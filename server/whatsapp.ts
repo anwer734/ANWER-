@@ -1,8 +1,10 @@
+import { Boom } from '@hapi/boom';
+import { DisconnectReason } from '@whiskeysockets/baileys';
 import { default as makeWASocket, useMultiFileAuthState, DisconnectReason, Browsers } from '@whiskeysockets/baileys';
 import fs from 'fs-extra';
 const { existsSync, removeSync, ensureDirSync } = fs;
 import * as path from 'path';
-import qrcode from 'qrcode';
+
 import { Server } from 'socket.io';
 import { storage } from './storage';
 
@@ -173,7 +175,50 @@ export class WhatsAppClientManager {
       }, 5000);
     }
 
-    this.sock.ev.on('connection.update', async (update: any) => {
+    
+      this.sock.ev.on('connection.update', async (update) => {
+        const { connection, lastDisconnect, qr } = update;
+        
+        if (qr) {
+          this.qrCodeData = qr;
+          try {
+            const qrcode = await import('qrcode');
+            const dataURL = await qrcode.default.toDataURL(qr);
+            this.lastQRCode = dataURL;
+            this.io.to(this.userId).emit('qr_code', { qr: dataURL });
+            this.io.to(this.userId).emit('connection_status', { status: 'connecting' });
+          } catch (err) {
+            console.error('QR handling error:', err);
+          }
+        }
+
+        if (connection === 'close') {
+          const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
+          console.log(`[WhatsApp] Connection closed for ${this.userId}. Status: ${statusCode}. Reconnecting: ${statusCode !== DisconnectReason.loggedOut}`);
+          
+          this.connectionState = 'disconnected';
+          this.io.to(this.userId).emit('connection_status', { status: 'disconnected' });
+          
+          if (statusCode === DisconnectReason.loggedOut || [401, 403, 405, 419].includes(statusCode as number)) {
+            const sessionDir = path.join(process.cwd(), 'sessions', this.userId);
+            if (existsSync(sessionDir)) {
+               try {
+                 removeSync(sessionDir);
+               } catch (e) {}
+            }
+            this.stop();
+          } else {
+            this.connect('qr'); // Auto-reconnect for other reasons
+          }
+        } else if (connection === 'open') {
+          console.log(`[WhatsApp] Connection opened for ${this.userId}`);
+          this.connectionState = 'connected';
+          this.qrCodeData = null;
+          this.lastQRCode = null;
+          this.io.to(this.userId).emit('connection_status', { status: 'connected' });
+          this.io.to(this.userId).emit('log_update', { message: '✅ تم الاتصال بنجاح' });
+        }
+      });is.sock.ev.on('connection.update', async (update: any) => {
       const { connection, lastDisconnect, qr } = update;
       
       if (qr && method === 'qr') {
