@@ -1,5 +1,4 @@
 import { Boom } from '@hapi/boom';
-import { DisconnectReason } from '@whiskeysockets/baileys';
 import { default as makeWASocket, useMultiFileAuthState, DisconnectReason, Browsers } from '@whiskeysockets/baileys';
 import fs from 'fs-extra';
 const { existsSync, removeSync, ensureDirSync } = fs;
@@ -106,6 +105,7 @@ export class WhatsAppClientManager {
   userId: string;
   sock: any = null;
   qrCodeData: string | null = null;
+  lastQRCode: string | null = null;
   connectionState: string = 'disconnected';
   monitoredKeywords: string[] = [];
   monitoredGroups: string[] = [];
@@ -134,9 +134,6 @@ export class WhatsAppClientManager {
       keepAliveIntervalMs: 10000,
       generateHighQualityLinkPreview: false,
       markOnlineOnConnect: true,
-      options: {
-        timeout: 60000,
-      },
       patchMessageBeforeSending: (message) => {
         const requiresPatch = !!(
           message.buttonsMessage ||
@@ -176,14 +173,14 @@ export class WhatsAppClientManager {
     }
 
     
-      this.sock.ev.on('connection.update', async (update) => {
+      this.sock.ev.on('connection.update', async (update: any) => {
         const { connection, lastDisconnect, qr } = update;
         
-        if (qr) {
+        if (qr && method === 'qr') {
           this.qrCodeData = qr;
           try {
             const qrcode = await import('qrcode');
-            const dataURL = await qrcode.default.toDataURL(qr);
+            const dataURL = await (qrcode.default || qrcode).toDataURL(qr);
             this.lastQRCode = dataURL;
             this.io.to(this.userId).emit('qr_code', { qr: dataURL });
             this.io.to(this.userId).emit('connection_status', { status: 'connecting' });
@@ -193,106 +190,65 @@ export class WhatsAppClientManager {
         }
 
         if (connection === 'close') {
-          const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
-          console.log(`[WhatsApp] Connection closed for ${this.userId}. Status: ${statusCode}. Reconnecting: ${statusCode !== DisconnectReason.loggedOut}`);
+          const statusCode = (lastDisconnect?.error as any)?.output?.statusCode || (lastDisconnect?.error as any)?.statusCode;
+          const shouldReconnect = statusCode !== DisconnectReason.loggedOut && statusCode !== 401 && statusCode !== 403 && statusCode !== 405;
+          console.log(`[WhatsApp] Connection closed for ${this.userId}. Status: ${statusCode}. Reconnecting: ${shouldReconnect}`);
           
-          this.connectionState = 'disconnected';
-          this.io.to(this.userId).emit('connection_status', { status: 'disconnected' });
-          
-          if (statusCode === DisconnectReason.loggedOut || [401, 403, 405, 419].includes(statusCode as number)) {
-            const sessionDir = path.join(process.cwd(), 'sessions', this.userId);
-            if (existsSync(sessionDir)) {
+          if (statusCode === 401 || statusCode === 403 || statusCode === 419 || statusCode === 405) {
+             const sessionDir = path.join(SESSIONS_DIR, this.userId);
+             if (existsSync(sessionDir)) {
                try {
                  removeSync(sessionDir);
-               } catch (e) {}
-            }
-            this.stop();
-          } else {
-            this.connect('qr'); // Auto-reconnect for other reasons
+                 console.log(`[WhatsApp] Session cleared for ${this.userId} due to error ${statusCode}`);
+               } catch (e) {
+                 console.error(`[WhatsApp] Failed to clear session for ${this.userId}:`, e);
+               }
+             }
+          }
+
+          this.connectionState = 'disconnected';
+          this.qrCodeData = null;
+          this.io.to(this.userId).emit('qr_code', { qr: null });
+          this.io.to(this.userId).emit('pairing_code', { code: null });
+          this.io.to(this.userId).emit('connection_status', { status: 'disconnected' });
+          this.io.to(this.userId).emit('login_status', {
+            logged_in: false, 
+            connected: false, 
+            awaiting_code: false, 
+            awaiting_password: false, 
+            is_running: this.stopFlag ? false : (users[this.userId]?.is_running || false)
+          });
+
+          if (shouldReconnect && !this.stopFlag) {
+            this.connect(method, phoneNumber);
           }
         } else if (connection === 'open') {
           console.log(`[WhatsApp] Connection opened for ${this.userId}`);
           this.connectionState = 'connected';
           this.qrCodeData = null;
-          this.lastQRCode = null;
+          this.io.to(this.userId).emit('qr_code', { qr: null }); // Clear QR on success
           this.io.to(this.userId).emit('connection_status', { status: 'connected' });
-          this.io.to(this.userId).emit('log_update', { message: '✅ تم الاتصال بنجاح' });
-        }
-      });is.sock.ev.on('connection.update', async (update: any) => {
-      const { connection, lastDisconnect, qr } = update;
-      
-      if (qr && method === 'qr') {
-        this.qrCodeData = qr;
-        try {
-          const qrcode = await import('qrcode');
-          const qrImage = await qrcode.default.toDataURL(qr);
-          this.io.to(this.userId).emit('qr_code', { qr: qrImage });
-          this.io.to(this.userId).emit('connection_status', { status: 'connecting' });
-        } catch (err) {
-          console.error(`[WhatsApp] Error generating QR data URL for ${this.userId}:`, err);
-        }
-      }
+          this.io.to(this.userId).emit('login_status', {
+            logged_in: true, 
+            connected: true, 
+            awaiting_code: false, 
+            awaiting_password: false, 
+            is_running: users[this.userId]?.is_running || false
+          });
+          this.io.to(this.userId).emit('log_update', { message: '✅ تم ربط الجهاز بنجاح مع واتساب' });
 
-      if (connection === 'close') {
-        const statusCode = (lastDisconnect?.error as any)?.output?.statusCode || (lastDisconnect?.error as any)?.statusCode;
-        const shouldReconnect = statusCode !== DisconnectReason.loggedOut && statusCode !== 401 && statusCode !== 403 && statusCode !== 405;
-        console.log(`[WhatsApp] Connection closed for ${this.userId}. Status: ${statusCode}. Reconnecting: ${shouldReconnect}`);
-        
-        if (statusCode === 401 || statusCode === 403 || statusCode === 419 || statusCode === 405) {
-           const sessionDir = path.join(SESSIONS_DIR, this.userId);
-           if (existsSync(sessionDir)) {
-             try {
-               removeSync(sessionDir);
-               console.log(`[WhatsApp] Session cleared for ${this.userId} due to error ${statusCode}`);
-             } catch (e) {
-               console.error(`[WhatsApp] Failed to clear session for ${this.userId}:`, e);
-             }
-           }
+          const userInfo = {
+            phone: this.sock.user.id.split(':')[0] || this.sock.user.id.split('@')[0],
+            name: this.sock.user.name || 'مستخدم واتساب'
+          };
+          this.io.to(this.userId).emit('user_info', userInfo);
+
+          const settings = await storage.getSettings(this.userId);
+          if (settings?.watchWords) {
+            this.updateMonitoringSettings(settings.watchWords, settings.groups || []);
+          }
         }
-
-        this.connectionState = 'disconnected';
-        this.qrCodeData = null;
-        this.io.to(this.userId).emit('qr_code', { qr: null });
-        this.io.to(this.userId).emit('pairing_code', { code: null });
-        this.io.to(this.userId).emit('connection_status', { status: 'disconnected' });
-        this.io.to(this.userId).emit('login_status', {
-          logged_in: false, 
-          connected: false, 
-          awaiting_code: false, 
-          awaiting_password: false, 
-          is_running: this.stopFlag ? false : (users[this.userId]?.is_running || false)
-        });
-
-        if (shouldReconnect && !this.stopFlag) {
-          this.connect(method, phoneNumber);
-        }
-      } else if (connection === 'open') {
-        console.log(`[WhatsApp] Connection opened for ${this.userId}`);
-        this.connectionState = 'connected';
-        this.qrCodeData = null;
-        this.io.to(this.userId).emit('qr_code', { qr: null }); // Clear QR on success
-        this.io.to(this.userId).emit('connection_status', { status: 'connected' });
-        this.io.to(this.userId).emit('login_status', {
-          logged_in: true, 
-          connected: true, 
-          awaiting_code: false, 
-          awaiting_password: false, 
-          is_running: users[this.userId]?.is_running || false
-        });
-        this.io.to(this.userId).emit('log_update', { message: '✅ تم ربط الجهاز بنجاح مع واتساب' });
-
-        const userInfo = {
-          phone: this.sock.user.id.split(':')[0] || this.sock.user.id.split('@')[0],
-          name: this.sock.user.name || 'مستخدم واتساب'
-        };
-        this.io.to(this.userId).emit('user_info', userInfo);
-
-        const settings = await storage.getSettings(this.userId);
-        if (settings?.watchWords) {
-          this.updateMonitoringSettings(settings.watchWords, settings.groups || []);
-        }
-      }
-    });
+      });
 
     this.sock.ev.on('creds.update', saveCreds);
 
@@ -439,8 +395,8 @@ export async function runScheduledLoop(userId: string, io: Server) {
 
   io.to(userId).emit('log_update', { message: `📊 انتهت دورة الإرسال المجدولة: ✅ ${success} نجح | ❌ ${fail} فشل` });
 
-  if (user.is_running && settings.loopIntervalSeconds > 0) {
+  if (user.is_running && settings.loopIntervalSeconds && settings.loopIntervalSeconds > 0) {
     io.to(userId).emit('log_update', { message: `⏳ انتظار لمدة ${settings.loopIntervalSeconds} ثانية قبل الدورة القادمة` });
-    setTimeout(() => runScheduledLoop(userId, io), settings.loopIntervalSeconds * 1000);
+    setTimeout(() => runScheduledLoop(userId, io), settings.loopIntervalSeconds! * 1000);
   }
 }

@@ -19,6 +19,12 @@ import type { Express } from "express";
   } from './whatsapp';
   import session from 'express-session';
 
+declare module 'express-session' {
+  interface SessionData {
+    userId: string;
+  }
+}
+
 export async function registerRoutes(
     httpServer: HttpServer,
     app: Express
@@ -56,7 +62,7 @@ export async function registerRoutes(
               socket.emit('connection_status', { status: 'connecting' });
             } else if (manager.qrCodeData) {
               const qrcode = await import('qrcode');
-              const dataURL = await qrcode.default.toDataURL(manager.qrCodeData);
+              const dataURL = await (qrcode.default || qrcode).toDataURL(manager.qrCodeData);
               manager.lastQRCode = dataURL;
               socket.emit('qr_code', { qr: dataURL });
               socket.emit('connection_status', { status: 'connecting' });

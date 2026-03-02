@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Smartphone, LogOut, Send, Save, Link as LinkIcon, Activity, User, ShieldAlert, FileText, CheckCircle2, XCircle, Play, Square, Loader2, Upload } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Input, Textarea, Label } from '@/components/ui/Input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { useInit, useConnect, useLogout, useSwitchUser, useSaveSettings, useSendNow, useExtractLinks, useAutoJoin } from '@/hooks/use-api';
 import { useSocket } from '@/hooks/use-socket';
 
