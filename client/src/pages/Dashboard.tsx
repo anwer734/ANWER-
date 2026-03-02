@@ -340,6 +340,8 @@ function MonitoringAndSendCard({ settings, socketState, startMonitoring, stopMon
     interval_seconds: settings?.intervalSeconds || 3600,
     loop_interval_seconds: settings?.loopIntervalSeconds || 0,
     send_type: settings?.sendType || 'manual',
+    scheduled_time: settings?.scheduledTime || '',
+    scheduled_time: settings?.scheduledTime || '',
   });
 
   const [images, setImages] = useState<{data: string, type: string}[]>([]);
@@ -354,6 +356,8 @@ function MonitoringAndSendCard({ settings, socketState, startMonitoring, stopMon
         interval_seconds: settings.intervalSeconds || 3600,
         loop_interval_seconds: settings.loopIntervalSeconds || 0,
         send_type: settings.sendType || 'manual',
+        scheduled_time: settings.scheduledTime || '',
+        scheduled_time: settings.scheduledTime || '',
       });
     }
   }, [settings]);
@@ -455,16 +459,27 @@ function MonitoringAndSendCard({ settings, socketState, startMonitoring, stopMon
               />
             </div>
             
-            <div className="space-y-2">
-              <Label>نوع الإرسال</Label>
-              <select 
-                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-primary"
-                value={formData.send_type}
-                onChange={e => setFormData({...formData, send_type: e.target.value})}
-              >
-                <option value="manual">يدوي</option>
-                <option value="scheduled">مجدول (تلقائي)</option>
-              </select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>نوع الإرسال</Label>
+                <select 
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-primary"
+                  value={formData.send_type}
+                  onChange={e => setFormData({...formData, send_type: e.target.value})}
+                >
+                  <option value="manual">يدوي</option>
+                  <option value="scheduled">مجدول (تلقائي)</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>وقت بدء الجولة</Label>
+                <Input 
+                  type="time" 
+                  value={formData.scheduled_time}
+                  onChange={e => setFormData({...formData, scheduled_time: e.target.value})}
+                />
+              </div>
             </div>
 
             {formData.send_type === 'scheduled' && (

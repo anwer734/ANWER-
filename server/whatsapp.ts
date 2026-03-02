@@ -365,6 +365,57 @@ export async function runScheduledLoop(userId: string, io: Server) {
     return;
   }
 
+  // Check for scheduled time
+  if (settings.scheduledTime) {
+    const now = new Date();
+    const [schedHour, schedMin] = settings.scheduledTime.split(':').map(Number);
+    const scheduledDate = new Date();
+    scheduledDate.setHours(schedHour, schedMin, 0, 0);
+
+    // If it's already past the time today, wait for next check
+    // This is a simple implementation, it will start sending once it's >= scheduled time
+    if (now < scheduledDate) {
+      const diffMs = scheduledDate.getTime() - now.getTime();
+      io.to(userId).emit('log_update', { message: `⏳ انتظار حتى وقت البداية المحدد: ${settings.scheduledTime}` });
+      setTimeout(() => runScheduledLoop(userId, io), Math.min(diffMs, 60000));
+      return;
+    }
+  }
+
+  // Check for scheduled time
+  if (settings.scheduledTime) {
+    const now = new Date();
+    const [schedHour, schedMin] = settings.scheduledTime.split(':').map(Number);
+    const scheduledDate = new Date();
+    scheduledDate.setHours(schedHour, schedMin, 0, 0);
+
+    // If it's already past the time today, it will start sending.
+    // We only wait if now is BEFORE the scheduled time.
+    if (now < scheduledDate) {
+      const diffMs = scheduledDate.getTime() - now.getTime();
+      io.to(userId).emit('log_update', { message: `⏳ انتظار حتى وقت البداية المحدد: ${settings.scheduledTime}` });
+      setTimeout(() => runScheduledLoop(userId, io), Math.min(diffMs, 60000));
+      return;
+    }
+  }
+
+  // Check for scheduled time
+  if (settings.scheduledTime) {
+    const now = new Date();
+    const [schedHour, schedMin] = settings.scheduledTime.split(':').map(Number);
+    const scheduledDate = new Date();
+    scheduledDate.setHours(schedHour, schedMin, 0, 0);
+
+    // If it's already past the time today, it will start sending.
+    // We only wait if now is BEFORE the scheduled time.
+    if (now < scheduledDate) {
+      const diffMs = scheduledDate.getTime() - now.getTime();
+      io.to(userId).emit('log_update', { message: `⏳ انتظار حتى وقت البداية المحدد: ${settings.scheduledTime}` });
+      setTimeout(() => runScheduledLoop(userId, io), Math.min(diffMs, 60000));
+      return;
+    }
+  }
+
   const message = settings.message || '';
   const groups = settings.groups || [];
 
