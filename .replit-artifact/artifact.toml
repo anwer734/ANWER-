@@ -1,0 +1,22 @@
+kind = "web"
+previewPath = "/"
+title = "Telegram App"
+version = "1.0.0"
+id = "artifacts/telegram-app"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 26197
+
+[services.development]
+run = "bash -c 'cd /home/runner/workspace/artifacts/telegram-app && /home/runner/workspace/.pythonlibs/bin/python3 app.py'"
+
+[services.env]
+PORT = "26197"
+BASE_PATH = "/"
