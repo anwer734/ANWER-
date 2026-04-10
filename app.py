@@ -1,3 +1,4 @@
+# ========== الكود الأصلي الكامل (بدون أي تعديل) ==========
 import os
 import json
 import time
@@ -1558,6 +1559,282 @@ def load_all_sessions():
                     logger.info(f"Loaded settings for {uid}")
 
 
+# ========== إضافات جديدة (فحص بوتات الحماية + الإرسال المتعدد) ==========
+# توضع هنا قبل تشغيل الخادم مباشرة
+
+import time as time_module
+from threading import Lock as ThreadLock
+
+# قائمة بوتات الحماية المعروفة
+PROTECTION_BOTS = [
+    "@DrWebBot", "@SpamBot", "@GroupAnonymousBot", "@AntiSpamBot",
+    "@Rose", "@MissRose_bot", "@combot", "@shieldy_bot", "@antispam_bot"
+]
+
+# لكل مستخدم، نستخدم قاموس لتخزين القرارات المؤجلة
+pending_decisions = {}
+pending_lock = ThreadLock()
+
+async def check_groups_for_bots_async(client, groups, user_id):
+    """فحص قائمة المجموعات للكشف عن بوتات الحماية"""
+    results = {}
+    for group in groups:
+        try:
+            entity_str = group.strip()
+            chat = None
+            if entity_str.startswith('+'):
+                from telethon import functions
+                try:
+                    result = await client(functions.messages.ImportChatInviteRequest(hash=entity_str[1:]))
+                    chat = result.chats[0] if result.chats else None
+                except:
+                    async for dialog in client.iter_dialogs():
+                        if dialog.entity.username and dialog.entity.username == entity_str[1:]:
+                            chat = dialog.entity
+                            break
+            elif entity_str.lstrip('-').isdigit():
+                chat = await client.get_entity(int(entity_str))
+            else:
+                username = entity_str.lstrip('@')
+                chat = await client.get_entity(f"@{username}")
+            if chat:
+                has_bot = False
+                try:
+                    async for member in client.iter_participants(chat, limit=150):
+                        if member.bot and member.username and f"@{member.username}" in PROTECTION_BOTS:
+                            has_bot = True
+                            break
+                except:
+                    pass
+                results[group] = has_bot
+            else:
+                results[group] = False
+        except Exception as e:
+            logger.warning(f"Error checking bot for {group}: {e}")
+            results[group] = False
+    return results
+
+def request_user_decision(user_id, group_entity, group_name):
+    """طلب قرار من المستخدم لمجموعة تحتوي على بوت حماية"""
+    socketio.emit('bot_protection_alert', {
+        'group': group_entity,
+        'group_name': group_name,
+        'user_id': user_id
+    }, to=user_id)
+    with pending_lock:
+        if user_id not in pending_decisions:
+            pending_decisions[user_id] = {}
+        pending_decisions[user_id][group_entity] = {
+            'status': 'pending',
+            'timestamp': time_module.time(),
+            'group_name': group_name
+        }
+
+def resolve_pending_decision(user_id, group_entity, action):
+    """حل القرار المعلق (continue, skip)"""
+    with pending_lock:
+        if user_id in pending_decisions and group_entity in pending_decisions[user_id]:
+            pending_decisions[user_id][group_entity]['status'] = action
+            return True
+    return False
+
+def get_pending_groups(user_id):
+    """الحصول على قائمة المجموعات المعلقة للمستخدم"""
+    with pending_lock:
+        if user_id in pending_decisions:
+            return {g: info for g, info in pending_decisions[user_id].items() if info['status'] == 'pending'}
+        return {}
+
+def clear_pending_for_group(user_id, group_entity):
+    with pending_lock:
+        if user_id in pending_decisions and group_entity in pending_decisions[user_id]:
+            del pending_decisions[user_id][group_entity]
+
+class RotatingMessagesManager:
+    """إدارة الإرسال المتعدد (5 رسائل متسلسلة)"""
+    def __init__(self, user_id, client_manager):
+        self.user_id = user_id
+        self.client_manager = client_manager
+        self.active = False
+        self.messages = []
+        self.groups = []
+        self.interval_minutes = 5
+        self.thread = None
+        self.stop_event = threading.Event()
+        self.current_index = 0
+
+    def start(self, groups, messages, interval_minutes):
+        self.groups = groups
+        self.messages = [m for m in messages if m and m.strip()]
+        self.interval_minutes = interval_minutes
+        self.active = True
+        self.stop_event.clear()
+        self.thread = threading.Thread(target=self._worker, daemon=True)
+        self.thread.start()
+        socketio.emit('log_update', {"message": f"🔄 بدأ الإرسال المتعدد (رسائل: {len(self.messages)}) كل {interval_minutes} دقيقة"}, to=self.user_id)
+
+    def stop(self):
+        self.active = False
+        self.stop_event.set()
+        socketio.emit('log_update', {"message": "⏹ تم إيقاف الإرسال المتعدد"}, to=self.user_id)
+
+    def _worker(self):
+        while not self.stop_event.is_set() and self.active:
+            if not self.messages or not self.groups:
+                break
+            # اختيار الرسالة الحالية
+            msg = self.messages[self.current_index % len(self.messages)]
+            # فحص بوتات الحماية قبل الإرسال
+            try:
+                bots_check = self.client_manager.run_coroutine(
+                    check_groups_for_bots_async(self.client_manager.client, self.groups, self.user_id),
+                    timeout=60
+                )
+                groups_to_send = []
+                for grp in self.groups:
+                    if bots_check.get(grp, False):
+                        group_name = grp
+                        try:
+                            entity = self.client_manager.run_coroutine(
+                                self.client_manager.client.get_entity(grp.strip()), timeout=10
+                            )
+                            group_name = getattr(entity, 'title', grp)
+                        except:
+                            pass
+                        request_user_decision(self.user_id, grp, group_name)
+                        socketio.emit('log_update', {"message": f"⚠️ مجموعة {group_name} تحتوي على بوت حماية - في انتظار قرارك"}, to=self.user_id)
+                        continue
+                    groups_to_send.append(grp)
+                if groups_to_send:
+                    self.client_manager.run_coroutine(
+                        self.client_manager._send_to_groups(groups_to_send, msg, None),
+                        timeout=300
+                    )
+            except Exception as e:
+                logger.error(f"Rotating send error: {e}")
+                socketio.emit('log_update', {"message": f"❌ خطأ في الإرسال المتعدد: {str(e)[:100]}"}, to=self.user_id)
+
+            self.current_index += 1
+            for _ in range(self.interval_minutes * 60):
+                if self.stop_event.is_set():
+                    break
+                time_module.sleep(1)
+
+# متغيرات لتخزين كائنات الإرسال المتعدد لكل مستخدم
+rotating_managers = {}
+rotating_lock = ThreadLock()
+
+# ========== مسارات API الجديدة ==========
+
+@app.route("/api/rotating/save", methods=["POST"])
+def api_rotating_save():
+    uid = get_current_user_id()
+    data = request.json or {}
+    messages = data.get("messages", ["", "", "", "", ""])
+    groups = data.get("groups", [])
+    interval = int(data.get("interval", 5))
+    settings = load_settings(uid)
+    settings['rotating_messages'] = messages
+    settings['rotating_groups'] = groups
+    settings['rotating_interval'] = interval
+    save_settings(uid, settings)
+    with USERS_LOCK:
+        ud = USERS.get(uid)
+        if ud:
+            ud.rotating_messages = messages
+            ud.rotating_groups = groups
+            ud.rotating_interval = interval
+    return jsonify({"success": True, "message": "تم حفظ إعدادات الإرسال المتعدد"})
+
+@app.route("/api/rotating/start", methods=["POST"])
+def api_rotating_start():
+    uid = get_current_user_id()
+    ud = get_or_create_user(uid)
+    if not ud.authenticated:
+        return jsonify({"success": False, "message": "يجب تسجيل الدخول أولاً"})
+    settings = load_settings(uid)
+    messages = settings.get('rotating_messages', ["", "", "", "", ""])
+    groups = settings.get('rotating_groups', [])
+    interval = settings.get('rotating_interval', 5)
+    if not groups:
+        return jsonify({"success": False, "message": "لم يتم تحديد أي مجموعة"})
+    if not any(m.strip() for m in messages):
+        return jsonify({"success": False, "message": "يجب تعبئة رسالة واحدة على الأقل"})
+    if not ud.client_manager:
+        return jsonify({"success": False, "message": "عميل التيليغرام غير جاهز"})
+    with rotating_lock:
+        if uid in rotating_managers and rotating_managers[uid].active:
+            rotating_managers[uid].stop()
+        rm = RotatingMessagesManager(uid, ud.client_manager)
+        rotating_managers[uid] = rm
+    rm.start(groups, messages, interval)
+    with USERS_LOCK:
+        ud.rotating_active = True
+    return jsonify({"success": True, "message": f"تم بدء الإرسال المتعدد (الرسائل: {len([m for m in messages if m.strip()])})"})
+
+@app.route("/api/rotating/stop", methods=["POST"])
+def api_rotating_stop():
+    uid = get_current_user_id()
+    with rotating_lock:
+        if uid in rotating_managers:
+            rotating_managers[uid].stop()
+            del rotating_managers[uid]
+    with USERS_LOCK:
+        ud = USERS.get(uid)
+        if ud:
+            ud.rotating_active = False
+    return jsonify({"success": True, "message": "تم إيقاف الإرسال المتعدد"})
+
+@app.route("/api/rotating/status")
+def api_rotating_status():
+    uid = get_current_user_id()
+    ud = get_or_create_user(uid)
+    settings = load_settings(uid)
+    active = False
+    with rotating_lock:
+        if uid in rotating_managers and rotating_managers[uid].active:
+            active = True
+    return jsonify({
+        "success": True,
+        "active": active or getattr(ud, 'rotating_active', False),
+        "messages": settings.get('rotating_messages', ["", "", "", "", ""]),
+        "groups": settings.get('rotating_groups', []),
+        "interval": settings.get('rotating_interval', 5)
+    })
+
+@app.route("/api/bot_decision", methods=["POST"])
+def api_bot_decision():
+    """استلام قرار المستخدم لمجموعة تحتوي على بوت حماية"""
+    data = request.json or {}
+    group_entity = data.get("group")
+    action = data.get("action")
+    uid = get_current_user_id()
+    if not group_entity or action not in ["continue", "skip"]:
+        return jsonify({"success": False, "message": "بيانات غير صحيحة"})
+    if resolve_pending_decision(uid, group_entity, action):
+        if action == "skip":
+            settings = load_settings(uid)
+            if 'skipped_groups' not in settings:
+                settings['skipped_groups'] = []
+            if group_entity not in settings['skipped_groups']:
+                settings['skipped_groups'].append(group_entity)
+            save_settings(uid, settings)
+            socketio.emit('log_update', {"message": f"🚫 تم تخطي المجموعة {group_entity} (بوت حماية)"}, to=uid)
+        else:
+            socketio.emit('log_update', {"message": f"✅ تمت متابعة الإرسال إلى {group_entity}"}, to=uid)
+        clear_pending_for_group(uid, group_entity)
+        return jsonify({"success": True, "message": f"تم {action} للمجموعة"})
+    return jsonify({"success": False, "message": "لا يوجد قرار معلق لهذه المجموعة"})
+
+@app.route("/api/pending_groups")
+def api_pending_groups():
+    """الحصول على المجموعات المعلقة التي تنتظر قرار المستخدم"""
+    uid = get_current_user_id()
+    pending = get_pending_groups(uid)
+    return jsonify({"success": True, "pending": [{"entity": g, "name": info['group_name']} for g, info in pending.items()]})
+
+
+# ========== تشغيل الخادم ==========
 if __name__ == '__main__':
     load_all_sessions()
     port = int(os.environ.get('PORT', 5000))
