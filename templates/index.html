@@ -3,2175 +3,837 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>مركز سرعة انجاز - تيليجرام</title>
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/static/manifest.json">
-
-    <!-- Theme -->
+    <title>مركز سرعة إنجاز - تيليجرام</title>
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1e3c78">
-
-    <!-- iOS PWA — ضروري للتثبيت على iPhone -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="TG Monitor">
     <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/apple-touch-icon.png">
-
-    <!-- Android PWA -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="TG Monitor">
-
-    <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32.png">
-    <link rel="shortcut icon" href="/static/icons/favicon-32.png">
-
-    <meta name="description" content="مراقبة رسائل تيليجرام وردود تلقائية">
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
-    <script>
-        // تسجيل Service Worker للـ PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/pwa-sw.js', { scope: '/' })
-                    .then(reg => {
-                        reg.addEventListener('updatefound', () => {
-                            const nw = reg.installing;
-                            nw && nw.addEventListener('statechange', () => {
-                                if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-                                    nw.postMessage({ type: 'SKIP_WAITING' });
-                                }
-                            });
-                        });
-                    }).catch(() => {});
-            });
-        }
-    </script>
     <style>
-        :root {
-            --primary: #5865f2;
-            --primary-dark: #4752c4;
-            --accent: #00d4aa;
-            --danger: #ed4245;
-            --warning: #faa81a;
-            --success: #3ba55c;
-            --bg-main: #0d1117;
-            --bg-card: #161b22;
-            --bg-card2: #1c2128;
-            --bg-input: #0d1117;
-            --border: #30363d;
-            --text: #e6edf3;
-            --text-muted: #8b949e;
-            --glow: rgba(88, 101, 242, 0.3);
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(145deg, #e0eafc 0%, #cfdef3 100%);
+            font-family: 'Segoe UI', 'Tahoma', 'Traditional Arabic', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg-main); color: var(--text); font-family: 'Segoe UI','Arial',sans-serif; min-height: 100vh; direction: rtl; }
-
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%);
-            border-bottom: 1px solid var(--border);
-            padding: 15px 25px;
+        .app-container {
+            max-width: 550px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 48px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+            backdrop-filter: blur(2px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .status-bar {
+            background: #f8fafd;
+            padding: 12px 20px 6px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #2c3e50;
+            border-bottom: 1px solid #eef2f9;
+            font-weight: 500;
+        }
+        .app-header {
+            background: linear-gradient(135deg, #1a2a3a 0%, #0f1a24 100%);
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #2c3e50;
         }
-        .header-logo { display: flex; align-items: center; gap: 12px; }
-        .logo-icon {
-            width: 45px; height: 45px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
+        .menu-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            font-size: 26px;
+            cursor: pointer;
+            color: #f9c74f;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            transition: 0.2s;
+        }
+        .menu-btn:hover { background: rgba(249, 199, 79, 0.3); transform: scale(1.02); }
+        .right-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .pin-icon {
             font-size: 22px;
-            box-shadow: 0 0 20px var(--glow);
+            color: #f9c74f;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .header-logo h1 {
-            font-size: 20px; font-weight: 700;
-            background: linear-gradient(135deg, #fff, var(--accent));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .header-logo p { font-size: 12px; color: var(--text-muted); }
-
-        .status-badge {
-            display: flex; align-items: center; gap: 6px;
-            padding: 6px 14px; border-radius: 20px;
-            font-size: 13px; font-weight: 600; border: 1px solid;
-        }
-        .status-badge.connected { background: rgba(59,165,92,0.15); border-color: var(--success); color: var(--success); }
-        .status-badge.disconnected { background: rgba(237,66,69,0.15); border-color: var(--danger); color: var(--danger); }
-        .status-badge.awaiting { background: rgba(250,168,26,0.15); border-color: var(--warning); color: var(--warning); }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s infinite; }
-        .connected .status-dot { background: var(--success); }
-        .disconnected .status-dot { background: var(--danger); animation: none; }
-        .awaiting .status-dot { background: var(--warning); }
-
-        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.3)} }
-
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-
-        /* Users Bar */
-        .users-bar {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 16px; padding: 16px 20px; margin-bottom: 20px;
-            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-        }
-        .users-bar-label { color: var(--text-muted); font-size: 13px; font-weight: 600; white-space: nowrap; }
-        .user-btn {
-            display: flex; align-items: center; gap: 8px;
-            padding: 8px 14px; border-radius: 10px;
-            border: 1px solid var(--border); background: var(--bg-input);
-            color: var(--text-muted); cursor: pointer; transition: all .2s; font-size: 13px;
-        }
-        .user-btn:hover { border-color: var(--primary); color: var(--text); }
-        .user-btn.active { color: var(--text); font-weight: 600; background: rgba(88,101,242,0.1); }
-        .user-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-        /* Tabs */
-        .tabs {
-            display: flex; gap: 4px;
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 14px; padding: 6px; margin-bottom: 20px; flex-wrap: wrap;
-        }
-        .tab-btn {
-            flex: 1; min-width: 100px; padding: 10px 16px;
-            border: none; border-radius: 10px; background: transparent;
-            color: var(--text-muted); cursor: pointer; transition: all .2s;
-            font-size: 13px; font-weight: 500;
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-        }
-        .tab-btn:hover { background: var(--bg-card2); color: var(--text); }
-        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 12px var(--glow); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        /* Cards */
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; margin-bottom: 16px; }
-        .card-header {
-            display: flex; align-items: center; gap: 10px;
-            margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
-        }
-        .card-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-        .card-header h3 { font-size: 15px; font-weight: 700; }
-        .card-header p { font-size: 12px; color: var(--text-muted); }
-
-        /* Forms */
-        .form-group { margin-bottom: 16px; }
-        .form-label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
-        .form-input {
-            width: 100%; padding: 11px 14px;
-            background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: 10px; color: var(--text); font-size: 14px;
-            outline: none; transition: all .2s; font-family: inherit;
-        }
-        .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(88,101,242,.15); }
-        textarea.form-input { resize: vertical; min-height: 100px; }
-
-        /* Buttons */
-        .btn {
-            padding: 10px 20px; border-radius: 10px; border: none;
-            cursor: pointer; font-size: 14px; font-weight: 600;
-            transition: all .2s; display: inline-flex; align-items: center; gap: 7px; font-family: inherit;
-        }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 6px 20px var(--glow); }
-        .btn-success { background: var(--success); color: white; }
-        .btn-success:hover { background: #2d8049; transform: translateY(-1px); }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-danger:hover { background: #c23b3d; transform: translateY(-1px); }
-        .btn-warning { background: var(--warning); color: #000; }
-        .btn-warning:hover { background: #d98d12; }
-        .btn-secondary { background: var(--bg-card2); color: var(--text); border: 1px solid var(--border); }
-        .btn-secondary:hover { background: var(--border); }
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
-        .btn-outline:hover { background: var(--primary); color: white; }
-        .btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
-        .btn-sm { padding: 6px 12px; font-size: 12px; }
-        .btn-lg { padding: 13px 28px; font-size: 15px; width: 100%; justify-content: center; }
-
-        /* Grid */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-        @media(max-width:768px) { .grid-2,.grid-3 { grid-template-columns: 1fr; } }
-
-        /* Stats */
-        .stats-bar { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
-        @media(max-width:900px) { .stats-bar { grid-template-columns: repeat(2,1fr); } }
-        @media(max-width:500px) { .stats-bar { grid-template-columns: 1fr; } }
-        .stat-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 12px;
-        }
-        .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-        .stat-info p { font-size: 12px; color: var(--text-muted); }
-        .stat-info h3 { font-size: 22px; font-weight: 700; }
-
-        /* Log */
-        .log-box {
-            background: #0a0d12; border: 1px solid var(--border);
-            border-radius: 12px; padding: 14px;
-            height: 280px; overflow-y: auto;
-            font-family: 'Courier New',monospace; font-size: 12px;
-        }
-        .log-entry { padding: 4px 0; border-bottom: 1px solid rgba(48,54,61,.3); color: var(--text-muted); }
-        .log-entry.alert { color: #ff6b6b; }
-        .log-entry.success { color: #3ba55c; }
-        .log-entry.info { color: var(--accent); }
-
-        /* Alert Items */
-        .alert-link {
-            color: var(--primary);
-            text-decoration: none;
+        .pin-icon.pinned { color: #f9844a; text-shadow: 0 0 6px #f9844a; }
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #2c3e50;
+            padding: 6px 14px;
+            border-radius: 40px;
             font-size: 12px;
             font-weight: 600;
+            cursor: pointer;
+            color: white;
+        }
+        .online-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #2ecc71;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 2px #2ecc7140;
+        }
+        .offline-dot { background-color: #e74c3c; }
+        .welcome-area {
+            background: linear-gradient(120deg, #1f3b4c, #1a2f3f);
+            padding: 12px 20px;
+            text-align: center;
+            border-bottom: 1px solid #2c4b5e;
+        }
+        .welcome-text {
+            color: #f9d371;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 60px;
+            backdrop-filter: blur(4px);
+        }
+        .welcome-text i { margin-left: 8px; color: #f9c74f; }
+        .welcome-phone {
+            font-size: 14px;
+            color: #ffd966;
+            margin-top: 5px;
+            font-weight: 600;
+            direction: ltr;
+            display: inline-block;
+            background: #00000055;
+            padding: 3px 12px;
+            border-radius: 40px;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-around;
+            gap: 12px;
+            padding: 12px 20px;
+            background: #ffffffdd;
+            backdrop-filter: blur(4px);
+            border-bottom: 1px solid #eef2f9;
+        }
+        .action-btn {
+            flex: 1;
+            background: #2c7da0;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        .action-btn.warning { background: #e67e22; }
+        .action-btn.danger { background: #c0392b; }
+        .action-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 20px 20px 15px;
+        }
+        .stat-card {
+            background: #ffffffdd;
+            backdrop-filter: blur(4px);
+            border-radius: 28px;
+            padding: 12px 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(255, 215, 120, 0.4);
+        }
+        .stat-card:hover { transform: translateY(-3px); background: #fff5e6; border-color: #f9c74f; }
+        .stat-card i { font-size: 22px; color: #2c7da0; }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 0 20px 20px;
+            padding: 6px 0;
+        }
+        .tab-btn {
+            background: #eef2f9;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #2c3e50;
+            transition: 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            transition: opacity .15s;
+            gap: 6px;
         }
-        .alert-link:hover { opacity: .75; text-decoration: underline; }
-        .alert-sender-link { color: var(--accent); }
-        .alert-meta-row {
+        .tab-btn.active { background: #2c7da0; color: white; box-shadow: 0 6px 12px rgba(44,125,160,0.3); }
+        .tab-content { display: none; padding: 0 20px 30px; }
+        .tab-content.active { display: block; }
+        .setting-section {
+            background: #ffffff;
+            border-radius: 32px;
+            margin-bottom: 24px;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.03);
+        }
+        .section-header {
             display: flex;
             align-items: center;
             gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 4px;
+            padding: 14px 20px;
+            background: #fefcf7;
+            border-bottom: 1px solid #f0e6d2;
+            font-weight: 800;
+            font-size: 17px;
+            color: #1f4e6e;
         }
-        .alert-meta {
-            font-size: 11px;
-            color: var(--text-muted);
+        .section-header i { font-size: 22px; color: #f9c74f; width: 32px; }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            border-bottom: 1px solid #f0f2f5;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .setting-item:last-child { border-bottom: none; }
+        .btn, .btn-primary, .btn-secondary, .btn-danger, .btn-success {
+            background: #2c7da0;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .btn-secondary { background: #a0b8c9; color: #1f2c33; }
+        .btn-danger { background: #e67e22; }
+        .btn-success { background: #27ae60; }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 28px;
+            font-family: inherit;
+            background: #fefefe;
+        }
+        .group-tag {
+            background: #eef2fa;
+            padding: 5px 12px;
+            border-radius: 30px;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 8px;
+            margin: 4px;
+            font-size: 13px;
+        }
+        .group-tag .remove { cursor: pointer; color: #e67e22; }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2c33;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            z-index: 2000;
+            font-weight: 500;
         }
         .alert-item {
-            background: var(--bg-card2); border: 1px solid var(--border);
-            border-radius: 12px; padding: 14px; margin-bottom: 10px;
-            border-right: 4px solid var(--danger); transition: all .2s;
+            border-right: 4px solid #e67e22;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #fff8f0;
+            border-radius: 20px;
         }
-        .alert-item:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(88,101,242,.1); }
-        .alert-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-        .alert-keyword { background: rgba(237,66,69,.2); color: var(--danger); padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
-        .alert-time { font-size: 11px; color: var(--text-muted); }
-        .alert-group { font-size: 12px; color: var(--accent); font-weight: 600; }
-        .alert-sender { font-size: 12px; color: var(--text-muted); }
-        .alert-msg { font-size: 13px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
-
-        /* Upload */
-        .upload-area {
-            border: 2px dashed var(--border); border-radius: 12px;
-            padding: 30px; text-align: center; cursor: pointer; transition: all .3s; position: relative;
+        .log-box {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 12px;
+            height: 240px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
         }
-        .upload-area:hover { border-color: var(--primary); background: rgba(88,101,242,.05); }
-        .upload-area.has-image { border-color: var(--accent); background: rgba(0,212,170,.05); }
-        .upload-preview { max-width: 200px; max-height: 150px; border-radius: 8px; object-fit: cover; display: none; }
-        .upload-info { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
-        .image-saved-tag {
-            display: inline-flex; align-items: center; gap: 5px;
-            background: rgba(0,212,170,.15); border: 1px solid var(--accent);
-            color: var(--accent); padding: 4px 12px; border-radius: 8px;
-            font-size: 12px; font-weight: 600;
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
         }
-
-        /* Groups */
-        .group-tag {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: rgba(88,101,242,.15); border: 1px solid rgba(88,101,242,.3);
-            color: var(--primary); padding: 5px 12px; border-radius: 8px; font-size: 12px; margin: 3px;
+        .drawer-overlay.open { visibility: visible; opacity: 1; }
+        .drawer-menu {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 280px;
+            background: #ffffff;
+            box-shadow: -4px 0 25px rgba(0, 0, 0, 0.1);
+            z-index: 1100;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            display: flex;
+            flex-direction: column;
+            border-radius: 28px 0 0 28px;
         }
-        .group-tag .remove { cursor: pointer; color: var(--text-muted); }
-        .group-tag .remove:hover { color: var(--danger); }
-        .groups-container { display: flex; flex-wrap: wrap; gap: 4px; min-height: 40px; }
-
-        /* Auto-reply rows */
-        .auto-reply-row {
-            display: grid; grid-template-columns: 1fr 2fr auto; gap: 10px;
-            align-items: center; padding: 10px;
-            background: var(--bg-card2); border: 1px solid var(--border);
-            border-radius: 10px; margin-bottom: 8px;
+        .drawer-overlay.open .drawer-menu { transform: translateX(0); }
+        .drawer-header { padding: 40px 24px 20px; background: #fafbfd; border-bottom: 1px solid #eceff5; }
+        .account-list { flex: 1; padding: 20px 0; overflow-y: auto; }
+        .account-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 24px;
+            cursor: pointer;
+            transition: 0.15s;
         }
-
-        /* Toggle */
-        .toggle-container { display: flex; align-items: center; gap: 10px; }
-        .toggle {
-            width: 44px; height: 24px; background: var(--border);
-            border-radius: 12px; cursor: pointer; position: relative;
-            transition: background .3s; flex-shrink: 0;
+        .account-item:hover { background: #f5f9fe; }
+        .account-item.active-account { background: #eef3fc; border-right: 4px solid #f9c74f; }
+        .account-avatar-small {
+            width: 48px;
+            height: 48px;
+            background: #cddfe7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c5a74;
         }
-        .toggle.active { background: var(--success); }
-        .toggle::after {
-            content: ''; position: absolute;
-            top: 3px; right: 3px; width: 18px; height: 18px;
-            background: white; border-radius: 50%; transition: transform .3s;
+        .close-drawer {
+            margin: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+            align-self: flex-start;
         }
-        .toggle.active::after { transform: translateX(-20px); }
-
-        /* Monitoring row */
-        .monitoring-row {
-            display: flex; align-items: center; justify-content: space-between;
-            background: var(--bg-card2); border-radius: 12px;
-            padding: 14px 18px; margin-bottom: 12px; border: 1px solid var(--border);
+        .add-account-btn {
+            margin: 16px 24px;
+            background: #eef3fa;
+            border-radius: 60px;
+            padding: 12px;
+            text-align: center;
+            color: #2c7da0;
+            font-weight: 600;
+            cursor: pointer;
         }
-        .monitoring-row .label { font-size: 14px; font-weight: 600; }
-        .monitoring-row .sublabel { font-size: 12px; color: var(--text-muted); }
-        .monitoring-active-indicator {
-            width: 10px; height: 10px; border-radius: 50%;
-            background: var(--success); animation: pulse 1.5s infinite;
-            display: inline-block; margin-left: 6px;
-        }
-
-        /* Modal */
         .modal-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,.7); z-index: 9000;
-            backdrop-filter: blur(4px);
-            align-items: center; justify-content: center;
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
         }
         .modal-overlay.open { display: flex; }
         .modal {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 20px; padding: 30px;
-            max-width: 480px; width: 90%;
-            box-shadow: 0 25px 60px rgba(0,0,0,.5);
-            animation: slideIn .3s ease;
+            background: white;
+            border-radius: 40px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
         }
-        @keyframes slideIn { from{transform:translateY(-20px);opacity:0} to{transform:translateY(0);opacity:1} }
-        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-        .modal-header h3 { font-size: 18px; font-weight: 700; }
-        .modal-close { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
-        .modal-close:hover { color: var(--text); }
-
-        /* Toast */
-        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; }
-        .toast {
-            padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 500;
-            max-width: 320px; animation: toastIn .3s ease;
-            display: flex; align-items: center; gap: 8px; border: 1px solid;
+        .admin-modal-content {
+            max-width: 90%;
+            width: 600px;
+            background: white;
+            border-radius: 40px;
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
-        @keyframes toastIn { from{transform:translateX(100px);opacity:0} to{transform:translateX(0);opacity:1} }
-        .toast.success { background: rgba(59,165,92,.15); border-color: var(--success); color: #6eff9a; }
-        .toast.error { background: rgba(237,66,69,.15); border-color: var(--danger); color: #ff8a8c; }
-        .toast.info { background: rgba(88,101,242,.15); border-color: var(--primary); color: #a8b4ff; }
-        .toast.warning { background: rgba(250,168,26,.15); border-color: var(--warning); color: #ffd166; }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-main); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-        .badge { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
-        .badge-success { background: rgba(59,165,92,.2); color: var(--success); }
-        .badge-primary { background: rgba(88,101,242,.2); color: var(--primary); }
-
-        .link-item {
-            background: var(--bg-card2); border: 1px solid var(--border);
-            border-radius: 10px; padding: 12px; margin-bottom: 8px;
-            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        .error-item { background: #fff5f5; border: 1px solid #ffc9c9; border-radius: 20px; padding: 12px; margin-bottom: 12px; }
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+        .toggle-switch {
+            width: 50px;
+            height: 26px;
+            background: #ccc;
+            border-radius: 30px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .link-info { flex: 1; min-width: 0; }
-        .link-url { color: var(--accent); font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .link-meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+        .toggle-switch.active { background: #27ae60; }
+        .toggle-switch::after {
+            content: '';
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            transition: 0.2s;
+        }
+        .toggle-switch.active::after { right: 24px; }
+        .search-results, .result-item { margin-top: 10px; background: #f5f5f5; padding: 8px; border-radius: 16px; }
+        .upload-preview { max-width: 100%; margin-top: 8px; border-radius: 20px; }
     </style>
 </head>
 <body>
-
-<!-- Header -->
-<div class="header">
-    <div class="header-logo">
-        <div class="logo-icon">🚀</div>
-        <div>
-            <h1>مركز سرعة انجاز</h1>
-            <p>نظام التليجرام الذكي</p>
+<div class="app-container">
+    <div class="status-bar"><span id="liveTime"></span><span><i class="fas fa-signal"></i> <i class="fas fa-battery-full"></i></span></div>
+    <div class="app-header">
+        <button class="menu-btn" id="drawerBtn"><i class="fas fa-bars"></i></button>
+        <div class="right-actions">
+            <div class="pin-icon" id="pinIcon"><i class="fas fa-thumbtack"></i></div>
+            <div class="connection-status" id="connectionStatus">
+                <span class="online-dot" id="onlineDot"></span><span class="status-text" id="statusText">جاري الاتصال</span>
+            </div>
         </div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px">
-        <button onclick="showInstallModal()" style="background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:10px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px">
-            <i class="fas fa-mobile-alt"></i> تثبيت التطبيق
-        </button>
-        <div id="connectionStatus" class="status-badge disconnected">
-            <div class="status-dot"></div>
-            <span id="connectionText">غير متصل</span>
-        </div>
-    </div>
-</div>
-
-<!-- PWA Install Bar — يظهر تلقائياً على Android Chrome -->
-<div id="pwaInstallBar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:10000;background:linear-gradient(135deg,#1e3c78,#2a52a0);color:#fff;padding:12px 16px;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,.4)">
-    <div style="display:flex;align-items:center;gap:10px;flex:1">
-        <img src="/static/icons/icon-192.png" style="width:40px;height:40px;border-radius:10px">
-        <div>
-            <div style="font-weight:700;font-size:14px">TG Monitor</div>
-            <div style="font-size:11px;opacity:.8">ثبّت التطبيق على هاتفك</div>
-        </div>
-    </div>
-    <div style="display:flex;gap:8px">
-        <button onclick="document.getElementById('pwaInstallBar').style.display='none'" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px">لاحقاً</button>
-        <button onclick="triggerInstall()" style="background:#fff;color:#1e3c78;border:none;border-radius:8px;padding:6px 14px;font-weight:700;cursor:pointer;font-size:13px"><i class="fas fa-download"></i> تثبيت</button>
-    </div>
-</div>
-
-<!-- Install Modal -->
-<div id="installModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;align-items:center;justify-content:center;padding:16px">
-    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:24px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;direction:rtl">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-            <h3 style="font-size:17px;font-weight:700"><i class="fas fa-mobile-alt" style="color:var(--accent)"></i> تثبيت كتطبيق جوال حقيقي</h3>
-            <button onclick="document.getElementById('installModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;line-height:1">✕</button>
-        </div>
-
-        <!-- زر التثبيت الفوري — يظهر فقط على Android Chrome عند توفر الـ prompt -->
-        <div id="installPromptSection" style="display:none;margin-bottom:16px">
-            <div style="background:rgba(0,212,170,.1);border:2px solid var(--accent);border-radius:14px;padding:16px;text-align:center">
-                <div style="font-size:28px;margin-bottom:8px">🎉</div>
-                <div style="font-weight:700;font-size:15px;margin-bottom:6px">جهازك يدعم التثبيت التلقائي!</div>
-                <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px">سيُثبَّت كتطبيق مستقل في قائمة التطبيقات — مثل واتساب وتيليجرام تماماً</div>
-                <button id="installBtn" onclick="triggerInstall()" style="width:100%;background:linear-gradient(135deg,#1e3c78,var(--accent));color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer">
-                    <i class="fas fa-download"></i> ثبّت التطبيق الآن
-                </button>
-            </div>
-        </div>
-
-        <div style="font-size:12px;color:var(--text-muted);background:rgba(250,168,26,.06);border:1px solid rgba(250,168,26,.2);border-radius:10px;padding:10px;margin-bottom:14px">
-            <i class="fas fa-lightbulb" style="color:var(--warning)"></i>
-            <strong style="color:var(--warning)"> مهم:</strong> لكي يُثبَّت كتطبيق حقيقي يجب فتح <strong>الرابط المنشور</strong> على الإنترنت (Render) وليس localhost، لأن التثبيت الحقيقي يتطلب HTTPS
-        </div>
-
-        <!-- Android -->
-        <div style="background:var(--bg-card2);border-radius:12px;padding:14px;margin-bottom:12px">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-                <span style="font-size:20px">🤖</span>
-                <strong style="font-size:14px">Android — Chrome</strong>
-                <span style="font-size:11px;background:rgba(59,165,92,.15);color:#3ba55c;border-radius:6px;padding:1px 7px">الأفضل</span>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:7px;font-size:12px">
-                <div style="background:rgba(237,66,69,.08);border:1px solid rgba(237,66,69,.2);border-radius:8px;padding:9px">
-                    <i class="fas fa-times-circle" style="color:var(--danger)"></i>
-                    <strong> لا تستخدم:</strong> "إضافة إلى الشاشة الرئيسية" من القائمة ⋮ — هذا <u>اختصار</u> فقط وليس تطبيقاً
-                </div>
-                <div style="background:rgba(59,165,92,.08);border:1px solid rgba(59,165,92,.2);border-radius:8px;padding:9px">
-                    <i class="fas fa-check-circle" style="color:#3ba55c"></i>
-                    <strong> استخدم بدلاً عنه:</strong> الشريط الأزرق أسفل الشاشة ← زر <strong>"تثبيت"</strong>، أو من قائمة ⋮ ← <strong>"تثبيت التطبيق"</strong> (غير إضافة للشاشة)
-                </div>
-                <div style="background:var(--bg-input);border-radius:6px;padding:7px;color:var(--text-muted)">
-                    💡 عند التثبيت الصحيح: يظهر في قائمة <strong>جميع التطبيقات</strong> مثل واتساب تماماً، ويفتح بدون متصفح
-                </div>
-            </div>
-        </div>
-
-        <!-- iPhone -->
-        <div style="background:var(--bg-card2);border-radius:12px;padding:14px;margin-bottom:16px">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-                <span style="font-size:20px">🍎</span>
-                <strong style="font-size:14px">iPhone — Safari</strong>
-            </div>
-            <ol style="font-size:12px;line-height:2.2;padding-right:18px;color:var(--text-muted);margin:0">
-                <li>افتح الرابط في <strong style="color:var(--text)">Safari</strong> (ليس Chrome أو غيره)</li>
-                <li>اضغط زر المشاركة <i class="fas fa-share-square"></i> في الأسفل</li>
-                <li>مرر للأسفل واختر <strong style="color:var(--text)">"إضافة إلى الشاشة الرئيسية"</strong></li>
-                <li>✅ يفتح بدون شريط Safari — مثل تطبيق عادي</li>
-            </ol>
-        </div>
-
-        <div style="background:var(--bg-input);border-radius:10px;padding:10px;font-size:11px;color:var(--text-muted);word-break:break-all">
-            <i class="fas fa-link" style="color:var(--accent)"></i> رابط التطبيق:
-            <span id="appUrlDisplay" style="color:var(--text);font-weight:600"></span>
-        </div>
-    </div>
-</div>
-
-<!-- Toast Container -->
-<div class="toast-container" id="toastContainer"></div>
-
-<!-- Login Modal -->
-<div class="modal-overlay" id="loginModal">
-    <div class="modal">
-        <div class="modal-header">
-            <div>
-                <h3>🔐 تسجيل الدخول</h3>
-                <p style="font-size:12px;color:var(--text-muted)">أدخل رقم هاتفك للدخول إلى تيليجرام</p>
-            </div>
-            <button class="modal-close" onclick="closeLoginModal()">✕</button>
-        </div>
-
-        <!-- Step 1: Phone -->
-        <div id="loginStep1">
-            <div class="form-group">
-                <label class="form-label">رقم الهاتف (مع رمز البلد)</label>
-                <input type="text" class="form-input" id="loginPhone" placeholder="+966XXXXXXXXX">
-            </div>
-            <div class="form-group">
-                <label class="form-label">كلمة المرور (اختياري - إذا كان لديك تحقق بخطوتين)</label>
-                <input type="password" class="form-input" id="loginPassword" placeholder="اتركه فارغاً إذا لم يكن لديك">
-            </div>
-            <button class="btn btn-primary btn-lg" onclick="startLogin(event)">
-                <i class="fas fa-sign-in-alt"></i> بدء تسجيل الدخول
-            </button>
-        </div>
-
-        <!-- Step 2: Code -->
-        <div id="loginStep2" style="display:none">
-            <div style="text-align:center;margin-bottom:20px">
-                <div style="font-size:40px">📱</div>
-                <p style="color:var(--text-muted);font-size:13px;margin-top:8px">تم إرسال كود التحقق إلى هاتفك</p>
-                <div id="autoCodeIndicator" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;padding:8px 12px;background:rgba(88,101,242,.08);border-radius:8px;font-size:12px;color:var(--primary)">
-                    <i class="fas fa-circle-notch fa-spin"></i>
-                    <span>يتم البحث عن الكود تلقائياً...</span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">كود التحقق</label>
-                <input type="text" class="form-input" id="verifyCode" placeholder="أدخل الكود (5-6 أرقام)" maxlength="6" style="font-size:20px;text-align:center;letter-spacing:8px;transition:all .3s" inputmode="numeric">
-            </div>
-            <button id="btnVerifyCode" class="btn btn-success btn-lg" onclick="verifyCode(event)">
-                <i class="fas fa-check"></i> تحقق من الكود
-            </button>
-            <button class="btn btn-secondary btn-lg" onclick="backToPhone()" style="margin-top:8px">
-                <i class="fas fa-arrow-right"></i> رجوع
-            </button>
-        </div>
-
-        <!-- Step 3: 2FA Password -->
-        <div id="loginStep3" style="display:none">
-            <div style="text-align:center;margin-bottom:20px">
-                <div style="font-size:40px">🔒</div>
-                <p style="color:var(--text-muted);font-size:13px;margin-top:8px">حسابك محمي بالتحقق بخطوتين</p>
-            </div>
-            <div class="form-group">
-                <label class="form-label">كلمة مرور التحقق بخطوتين</label>
-                <input type="password" class="form-input" id="twoFactorPass" placeholder="أدخل كلمة المرور">
-            </div>
-            <button class="btn btn-success btn-lg" onclick="verifyPassword(event)">
-                <i class="fas fa-unlock"></i> تأكيد كلمة المرور
-            </button>
-        </div>
-    </div>
-</div>
-
-<div class="container">
-    <!-- Users Bar -->
-    <div class="users-bar">
-        <span class="users-bar-label"><i class="fas fa-users"></i> تبديل المستخدم:</span>
-        {% for uid, udata in predefined_users.items() %}
-        <button class="user-btn {% if uid == current_user_id %}active{% endif %}" 
-                id="userBtn_{{ uid }}" 
-                onclick="switchUser('{{ uid }}')"
-                style="border-color: {{ udata.color }}40">
-            <div class="user-dot" style="background: {{ udata.color }}"></div>
-            <i class="{{ udata.icon }}" style="color: {{ udata.color }}"></i>
-            {{ udata.name }}
-        </button>
-        {% endfor %}
+    <div class="welcome-area">
+        <div class="welcome-text"><i class="fas fa-star-of-life"></i> اهلا بكم الي تطبيق ابو ملاك للخدمات التقنية <i class="fas fa-star-of-life"></i></div>
+        <div class="welcome-phone"><i class="fas fa-phone-alt"></i> +966510349663</div>
     </div>
 
-    <!-- Stats Bar -->
+    <div class="action-buttons">
+        <button class="action-btn" onclick="openAdminModal()"><i class="fas fa-user-shield"></i> الإدارة</button>
+        <button class="action-btn warning" onclick="openErrorExplorer()"><i class="fas fa-bug"></i> مستكشف الأخطاء</button>
+    </div>
+
     <div class="stats-bar">
-        <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(88,101,242,.15);color:var(--primary)"><i class="fas fa-paper-plane"></i></div>
-            <div class="stat-info"><p>الرسائل المرسلة</p><h3 id="statSent">0</h3></div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(237,66,69,.15);color:var(--danger)"><i class="fas fa-times-circle"></i></div>
-            <div class="stat-info"><p>الأخطاء</p><h3 id="statErrors">0</h3></div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(0,212,170,.15);color:var(--accent)"><i class="fas fa-bell"></i></div>
-            <div class="stat-info"><p>التنبيهات</p><h3 id="statAlerts">0</h3></div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(59,165,92,.15);color:var(--success)"><i class="fas fa-reply"></i></div>
-            <div class="stat-info"><p>الردود التلقائية</p><h3 id="statReplies">0</h3></div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(250,168,26,.15);color:var(--warning)"><i class="fas fa-circle" id="statStatusDot"></i></div>
-            <div class="stat-info"><p>حالة المراقبة</p><h3 id="statStatus" style="font-size:13px">متوقف</h3></div>
-        </div>
-        <div class="stat-card" style="cursor:pointer;opacity:.8" onclick="resetStats()" title="إعادة تعيين الإحصائيات">
-            <div class="stat-icon" style="background:rgba(139,148,158,.1);color:var(--text-muted)"><i class="fas fa-redo-alt"></i></div>
-            <div class="stat-info"><p style="color:var(--text-muted)">إعادة التعيين</p><h3 style="font-size:11px;color:var(--text-muted)">اضغط هنا</h3></div>
-        </div>
+        <div class="stat-card" onclick="resetStats()"><i class="fas fa-paper-plane"></i><br><span id="statSent">0</span><br><small>مرسلة</small></div>
+        <div class="stat-card"><i class="fas fa-times-circle"></i><br><span id="statErrors">0</span><br><small>أخطاء</small></div>
+        <div class="stat-card"><i class="fas fa-bell"></i><br><span id="statAlerts">0</span><br><small>تنبيهات</small></div>
+        <div class="stat-card"><i class="fas fa-reply"></i><br><span id="statReplies">0</span><br><small>ردود</small></div>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('tab-login', event)"><i class="fas fa-user-lock"></i> تسجيل الدخول</button>
-        <button class="tab-btn" onclick="showTab('tab-send', event)"><i class="fas fa-paper-plane"></i> الإرسال</button>
-        <button class="tab-btn" onclick="showTab('tab-monitor', event)"><i class="fas fa-eye"></i> المراقبة</button>
-        <button class="tab-btn" onclick="showTab('tab-autoreply', event)"><i class="fas fa-reply"></i> رد تلقائي</button>
-        <button class="tab-btn" onclick="showTab('tab-groups', event)"><i class="fas fa-link"></i> الانضمام</button>
-        <button class="tab-btn" onclick="showTab('tab-logs', event)"><i class="fas fa-terminal"></i> السجل</button>
-        <button class="tab-btn" onclick="showTab('tab-msgs', event)" id="tabMsgsBtn"><i class="fas fa-history"></i> رسائلي <span id="batchBadge" style="display:none;background:#ed4245;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-right:4px">0</span></button>
-    </div>
+    <div class="settings-content" id="settingsContent"></div>
+</div>
 
-    <!-- Tab: Login -->
-    <div id="tab-login" class="tab-content active">
-        <div class="grid-2">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon" style="background:rgba(88,101,242,.15);color:var(--primary)"><i class="fas fa-user-lock"></i></div>
-                    <div><h3>حالة تسجيل الدخول</h3><p>إدارة الاتصال بالتليجرام</p></div>
-                </div>
-                <div style="text-align:center;padding:20px">
-                    <div style="font-size:50px;margin-bottom:12px" id="loginStatusIcon">❌</div>
-                    <div id="loginStatusText" style="font-size:15px;color:var(--text-muted)">غير مسجل دخول</div>
-                    <div id="loginPhone_display" style="font-size:13px;color:var(--text-muted);margin-top:8px"></div>
-                    <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-                        <button class="btn btn-primary" id="btnLogin" onclick="openLoginModal()">
-                            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
-                        </button>
-                        <button class="btn btn-danger btn-sm" id="btnLogout" onclick="doLogout()" style="display:none">
-                            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon" style="background:rgba(0,212,170,.15);color:var(--accent)"><i class="fas fa-info-circle"></i></div>
-                    <div><h3>إعدادات API</h3><p>بيانات تيليجرام API</p></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">TELEGRAM_API_ID</label>
-                    <input class="form-input" value="{{ '✅ محدد' if settings.get('api_configured') else '❌ غير محدد - أضفه في المتغيرات البيئية' }}" readonly style="{% if settings.get('api_configured') %}border-color:var(--success){% else %}border-color:var(--danger){% endif %}">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">TELEGRAM_API_HASH</label>
-                    <input class="form-input" value="{{ '✅ محدد' if settings.get('api_configured') else '❌ غير محدد - أضفه في المتغيرات البيئية' }}" readonly style="{% if settings.get('api_configured') %}border-color:var(--success){% else %}border-color:var(--danger){% endif %}">
-                </div>
-                {% if not settings.get('api_configured') %}
-                <div style="background:rgba(237,66,69,.1);border:1px solid var(--danger);border-radius:10px;padding:12px;font-size:13px;color:var(--danger)">
-                    ⚠️ يجب إضافة TELEGRAM_API_ID و TELEGRAM_API_HASH في المتغيرات البيئية (Secrets) للتطبيق
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Tab: Send -->
-    <div id="tab-send" class="tab-content">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-icon" style="background:rgba(88,101,242,.15);color:var(--primary)"><i class="fas fa-paper-plane"></i></div>
-                <div><h3>إرسال الرسائل</h3><p>إرسال فوري أو مجدول مع صورة ثابتة</p></div>
-            </div>
-
-            <div class="grid-2" style="margin-bottom:16px">
-                <button class="btn btn-secondary" id="btnSendManual" onclick="setSendType('manual')" style="border:1px solid var(--primary);color:var(--primary)">
-                    <i class="fas fa-hand-pointer"></i> إرسال فوري
-                </button>
-                <button class="btn btn-secondary" id="btnSendScheduled" onclick="setSendType('scheduled')">
-                    <i class="fas fa-clock"></i> إرسال مجدول
-                </button>
-            </div>
-
-            <div id="scheduledOptions" style="display:none" class="form-group">
-                <label class="form-label">الفترة الزمنية (بالدقائق)</label>
-                <input type="number" class="form-input" id="sendInterval" placeholder="60" min="1" value="60">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">نص الرسالة</label>
-                <textarea class="form-input" id="sendMessage" placeholder="اكتب رسالتك هنا..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label"><i class="fas fa-image"></i> الصورة المرفقة (تُحفظ وتُرسل مع كل رسالة)</label>
-                <div class="upload-area" id="uploadArea" onclick="document.getElementById('imageInput').click()">
-                    <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="uploadImage(this)">
-                    <img id="imagePreview" class="upload-preview">
-                    <div id="uploadPlaceholder">
-                        <i class="fas fa-cloud-upload-alt" style="font-size:32px;color:var(--text-muted)"></i>
-                        <p class="upload-info">اضغط لرفع صورة</p>
-                        <p style="font-size:11px;color:var(--text-muted)">الصورة ستحفظ وتُرسل مع كل رسالة تلقائياً</p>
-                    </div>
-                </div>
-                <div id="savedImageTag" style="margin-top:8px;display:none;align-items:center;gap:8px">
-                    <span class="image-saved-tag">
-                        <i class="fas fa-check-circle"></i>
-                        <span id="savedImageName">صورة محفوظة</span>
-                    </span>
-                    <button class="btn btn-danger btn-sm" onclick="removeImage()">
-                        <i class="fas fa-trash"></i> حذف
-                    </button>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label"><i class="fas fa-link" style="color:var(--accent)"></i> روابط المجموعات المستهدفة</label>
-                <textarea class="form-input" id="rawGroupsInput" rows="4" style="resize:vertical;font-size:12px;direction:ltr;text-align:left" placeholder="الصق الروابط هنا... النظام يستخرجها تلقائياً&#10;مثال:&#10;https://t.me/mygroup&#10;@channel1 @channel2&#10;روابط مختلطة مع نصوص عادية"></textarea>
-                <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
-                    <button class="btn btn-sm" onclick="extractGroups()" style="background:linear-gradient(135deg,var(--accent),var(--primary));color:#fff;border:none">
-                        <i class="fas fa-magic"></i> استخراج تلقائي
-                    </button>
-                    <input class="form-input" id="groupInput" placeholder="أو أضف رابطاً يدوياً..." style="flex:1;min-width:150px;direction:ltr;text-align:left" onkeydown="if(event.key==='Enter') addGroup()">
-                    <button class="btn btn-outline btn-sm" onclick="addGroup()"><i class="fas fa-plus"></i></button>
-                </div>
-                <div class="groups-container" id="groupsList" style="margin-top:8px"></div>
-                <div id="groupsCountBadge" style="margin-top:6px;font-size:12px;color:var(--text-muted)"></div>
-            </div>
-
-            <div id="sendProgress" style="display:none;margin-bottom:12px">
-                <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:12px">
-                    <span style="color:var(--text-muted)">جارٍ الإرسال...</span>
-                    <span id="sendProgressText" style="color:var(--accent)">0 / 0</span>
-                </div>
-                <div style="background:var(--bg-input);border-radius:4px;height:6px;overflow:hidden">
-                    <div id="sendProgressBar" style="height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));width:0%;transition:width .3s"></div>
-                </div>
-            </div>
-
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-                <button class="btn btn-primary" id="btnSendNow" onclick="sendNow()" style="flex:1">
-                    <i class="fas fa-paper-plane"></i> <span id="btnSendText">إرسال الآن</span>
-                </button>
-                <button class="btn btn-success" onclick="saveSettings()">
-                    <i class="fas fa-save"></i> حفظ
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tab: Monitor -->
-    <div id="tab-monitor" class="tab-content">
-        <div class="grid-2">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon" style="background:rgba(0,212,170,.15);color:var(--accent)"><i class="fas fa-eye"></i></div>
-                    <div><h3>مراقبة الكلمات</h3><p>تنبيه فوري عند ذكر الكلمات المحددة</p></div>
-                </div>
-
-                <div class="monitoring-row">
-                    <div>
-                        <div class="label">
-                            حالة المراقبة
-                            <span id="monitoringIndicator" class="monitoring-active-indicator" style="display:none"></span>
-                        </div>
-                        <div class="sublabel" id="monitoringSubLabel">المراقبة متوقفة</div>
-                    </div>
-                    <div style="display:flex;gap:8px">
-                        <button class="btn btn-success btn-sm" id="btnStartMonitor" onclick="startMonitoring()">
-                            <i class="fas fa-play"></i> تشغيل
-                        </button>
-                        <button class="btn btn-danger btn-sm" id="btnStopMonitor" onclick="stopMonitoring()" style="display:none">
-                            <i class="fas fa-stop"></i> إيقاف
-                        </button>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label"><i class="fas fa-search" style="color:var(--danger)"></i> الكلمات المراقبة</label>
-                    <textarea class="form-input" id="rawKeywordsInput" rows="3" style="resize:vertical;font-size:12px" placeholder="أدخل كلمات مفصولة بفاصلة أو سطر جديد&#10;مثال: سعر، عرض، خصم، للبيع"></textarea>
-                    <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-                        <button class="btn btn-sm" onclick="extractKeywords()" style="background:linear-gradient(135deg,var(--danger),#b03030);color:#fff;border:none;white-space:nowrap">
-                            <i class="fas fa-magic"></i> استخراج
-                        </button>
-                        <input class="form-input" id="watchWordInput" placeholder="أو أضف كلمة واحدة..." style="flex:1" onkeydown="if(event.key==='Enter') addWatchWord()">
-                        <button class="btn btn-outline btn-sm" onclick="addWatchWord()"><i class="fas fa-plus"></i></button>
-                    </div>
-                    <div class="groups-container" id="watchWordsList" style="margin-top:8px"></div>
-                </div>
-
-                <button class="btn btn-primary" onclick="saveSettings()" style="width:100%">
-                    <i class="fas fa-save"></i> حفظ الكلمات
-                </button>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon" style="background:rgba(237,66,69,.15);color:var(--danger)"><i class="fas fa-bell"></i></div>
-                    <div><h3>التنبيهات الواردة</h3><p id="alertCountText">لا توجد تنبيهات</p></div>
-                </div>
-                <div id="alertsList" style="max-height:400px;overflow-y:auto">
-                    <div style="text-align:center;padding:30px;color:var(--text-muted)">
-                        <i class="fas fa-bell-slash" style="font-size:30px;margin-bottom:10px;display:block"></i>
-                        لا توجد تنبيهات بعد
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tab: Auto Reply -->
-    <div id="tab-autoreply" class="tab-content">
-        <div class="grid-2">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon" style="background:rgba(0,212,170,.15);color:var(--accent)"><i class="fas fa-reply"></i></div>
-                    <div><h3>قواعد الرد التلقائي</h3><p>يرد على الرسالة مباشرة (reply)</p></div>
-                </div>
-
-                <div id="autoRepliesList" style="margin-bottom:16px">
-                    <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">
-                        لا توجد قواعد - اضغط إضافة قاعدة
-                    </div>
-                </div>
-
-                <div style="display:flex;gap:10px;flex-wrap:wrap">
-                    <button class="btn btn-outline" onclick="addAutoReplyRow()" style="flex:1">
-                        <i class="fas fa-plus"></i> إضافة قاعدة
-                    </button>
-                    <button class="btn btn-success" onclick="saveAutoReplies()" style="flex:1">
-                        <i class="fas fa-save"></i> حفظ القواعد
-                    </button>
-                </div>
-
-                <div style="margin-top:16px;padding:12px;background:rgba(0,212,170,.05);border:1px solid rgba(0,212,170,.2);border-radius:10px;font-size:12px;color:var(--text-muted)">
-                    <i class="fas fa-info-circle" style="color:var(--accent)"></i>
-                    عند وصول رسالة تحتوي الكلمة المحددة، يتم الرد عليها مباشرة كـ <strong style="color:var(--accent)">Reply</strong> مع عرض رسالة المرسل الأصلية.
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon" style="background:rgba(59,165,92,.15);color:var(--success)"><i class="fas fa-comments"></i></div>
-                    <div><h3>سجل الردود التلقائية</h3><p id="autoReplyCountText">لا توجد ردود بعد</p></div>
-                </div>
-                <div id="autoReplyLog" style="max-height:450px;overflow-y:auto">
-                    <div style="text-align:center;padding:30px;color:var(--text-muted)">
-                        <i class="fas fa-robot" style="font-size:30px;margin-bottom:10px;display:block;opacity:.4"></i>
-                        ستظهر هنا الردود التلقائية عند تشغيلها
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tab: Groups Join -->
-    <div id="tab-groups" class="tab-content">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-icon" style="background:rgba(88,101,242,.15);color:var(--primary)"><i class="fas fa-link"></i></div>
-                <div><h3>الانضمام للمجموعات</h3><p>ألصق الروابط وسيفرزها النظام تلقائياً ثم ينضم</p></div>
-            </div>
-
-            <!-- الإدخال الجماعي -->
-            <div class="form-group">
-                <label class="form-label"><i class="fas fa-paste" style="color:var(--accent)"></i> ألصق الروابط هنا (بأي تنسيق — رابط، يوزر، ID)</label>
-                <textarea class="form-input" id="joinRawInput" rows="5"
-                    placeholder="ألصق أي شيء هنا، مثلاً:&#10;https://t.me/+Abc123&#10;@mygroup&#10;t.me/channel1&#10;-1001234567890"
-                    style="resize:vertical;font-family:monospace;font-size:13px"></textarea>
-            </div>
-
-            <div style="display:flex;gap:8px;margin-bottom:16px">
-                <button class="btn btn-primary" onclick="parseJoinLinks()" style="flex:1">
-                    <i class="fas fa-filter"></i> فرز الروابط وعرضها
-                </button>
-                <button class="btn btn-secondary" onclick="clearJoinInput()">
-                    <i class="fas fa-times"></i> مسح
-                </button>
-            </div>
-
-            <!-- نتائج الفرز -->
-            <div id="joinParsedSection" style="display:none">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-                    <span id="joinParsedCount" style="font-weight:700;color:var(--accent);font-size:15px"></span>
-                    <span style="font-size:12px;color:var(--text-muted)">مجموعة جاهزة للانضمام</span>
-                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('joinParsedSection').style.display='none'">إخفاء</button>
-                </div>
-                <div id="joinParsedList" style="max-height:200px;overflow-y:auto;background:var(--bg-input);border-radius:10px;padding:10px;margin-bottom:12px"></div>
-                <div id="joinProgressBar" style="display:none;margin-bottom:12px">
-                    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-                        <span id="joinProgressText">جارٍ الانضمام...</span>
-                        <span id="joinProgressStats" style="color:var(--accent)"></span>
-                    </div>
-                    <div style="background:var(--bg-card2);border-radius:6px;height:8px;overflow:hidden">
-                        <div id="joinProgressFill" style="height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));width:0%;transition:width .3s;border-radius:6px"></div>
-                    </div>
-                </div>
-                <button id="startBulkJoinBtn" class="btn btn-primary btn-lg" onclick="startBulkJoin()" style="width:100%;font-weight:700">
-                    <i class="fas fa-rocket"></i> ابدأ الانضمام للجميع
-                </button>
-                <div id="bulkJoinDone" style="display:none;margin-top:10px"></div>
-            </div>
-
-            <!-- انضمام فردي سريع -->
-            <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:16px">
-                <label class="form-label" style="color:var(--text-muted)">أو انضمام فردي سريع</label>
-                <div style="display:flex;gap:8px">
-                    <input class="form-input" id="joinGroupLink" placeholder="https://t.me/+xxxx أو @groupname" style="flex:1">
-                    <button class="btn btn-secondary" onclick="joinGroup()">
-                        <i class="fas fa-sign-in-alt"></i> انضم
-                    </button>
-                </div>
-            </div>
-
-            <div id="joinResult" style="margin-top:12px"></div>
-        </div>
-    </div>
-
-    <!-- Tab: Logs -->
-    <div id="tab-logs" class="tab-content">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-icon" style="background:rgba(88,101,242,.15);color:var(--primary)"><i class="fas fa-terminal"></i></div>
-                <div><h3>سجل النشاط</h3><p>سجل مباشر لجميع العمليات</p></div>
-                <button class="btn btn-secondary btn-sm" onclick="clearLog()" style="margin-right:auto">
-                    <i class="fas fa-trash"></i> مسح
-                </button>
-            </div>
-            <div class="log-box" id="logBox"></div>
-        </div>
-    </div>
-
-    <!-- Tab: رسائلي المُرسلة -->
-    <div id="tab-msgs" class="tab-content">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-icon" style="background:rgba(0,212,170,.15);color:var(--accent)"><i class="fas fa-history"></i></div>
-                <div>
-                    <h3>رسائلي المُرسلة في هذه الجلسة</h3>
-                    <p>تعديل أو حذف الرسائل التي أرسلتها لجميع المجموعات دفعةً واحدة</p>
-                </div>
-                <button class="btn btn-secondary btn-sm" onclick="loadSentBatches()" style="margin-right:auto">
-                    <i class="fas fa-sync"></i> تحديث
-                </button>
-            </div>
-
-            <div style="background:rgba(250,168,26,.08);border:1px solid rgba(250,168,26,.25);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--warning)">
-                <i class="fas fa-info-circle"></i>
-                <strong>كيف تعمل؟</strong> — بعد كل إرسال جماعي يُحفظ هنا تلقائياً. اضغط ✏️ لتعديل نص الرسالة في جميع المجموعات فوراً، أو 🗑️ لحذفها منها كلها.
-            </div>
-
-            <div id="batchListContainer">
-                <div style="text-align:center;padding:40px;color:var(--text-muted)">
-                    <i class="fas fa-inbox" style="font-size:36px;margin-bottom:12px;display:block;opacity:.4"></i>
-                    <div>لا توجد رسائل مُرسلة في هذه الجلسة بعد</div>
-                    <div style="font-size:12px;margin-top:6px">الرسائل التي ترسلها جماعياً ستظهر هنا</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- مودال تعديل الرسالة -->
-    <div id="editBatchModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;align-items:center;justify-content:center">
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:18px;padding:24px;max-width:520px;width:92%;direction:rtl">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-                <h3 style="font-size:16px;font-weight:700"><i class="fas fa-edit" style="color:var(--accent)"></i> تعديل الرسالة في جميع المجموعات</h3>
-                <button onclick="closeEditModal()" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer">✕</button>
-            </div>
-            <div style="background:rgba(250,168,26,.08);border:1px solid rgba(250,168,26,.2);border-radius:8px;padding:10px;font-size:12px;color:var(--warning);margin-bottom:14px">
-                <i class="fas fa-exclamation-triangle"></i> سيتم تعديل الرسالة <strong>فعلياً</strong> في تيليجرام داخل جميع المجموعات التي أُرسلت إليها
-            </div>
-            <input type="hidden" id="editBatchId">
-            <textarea id="editBatchText" style="width:100%;background:var(--bg-input);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:14px;font-family:inherit;resize:vertical;min-height:120px;box-sizing:border-box" placeholder="أدخل النص الجديد للرسالة..."></textarea>
-            <div style="margin-top:4px;font-size:11px;color:var(--text-muted)">
-                سيُرسَل هذا النص بديلاً عن النص القديم في جميع المجموعات
-            </div>
-            <div style="display:flex;gap:10px;margin-top:16px">
-                <button onclick="confirmEditBatch()" class="btn btn-primary" style="flex:1;font-weight:700">
-                    <i class="fas fa-check"></i> تعديل الآن في جميع المجموعات
-                </button>
-                <button onclick="closeEditModal()" class="btn btn-secondary">إلغاء</button>
-            </div>
-        </div>
+<!-- Drawer Menu -->
+<div class="drawer-overlay" id="drawerOverlay">
+    <div class="drawer-menu">
+        <button class="close-drawer" id="closeDrawerBtn"><i class="fas fa-chevron-left"></i></button>
+        <div class="drawer-header"><h4><i class="fas fa-users"></i> الحسابات</h4><p>اختر حساباً للتبديل</p></div>
+        <div class="account-list" id="accountList"></div>
+        <div class="add-account-btn" id="addAccountHint"><i class="fas fa-plus-circle"></i> إضافة حساب جديد</div>
     </div>
 </div>
+
+<!-- Modals -->
+<div id="loginModal" class="modal-overlay"><div class="modal"><h3>🔐 تسجيل الدخول</h3><button class="modal-close" onclick="closeLoginModal()">✕</button>
+    <div id="loginStep1"><input type="text" id="loginPhone" placeholder="+966XXXXXXXXX"><button class="btn-primary" onclick="startLogin()">إرسال الكود</button></div>
+    <div id="loginStep2" style="display:none"><input type="text" id="verifyCode" placeholder="كود التحقق"><button class="btn-primary" id="btnVerifyCode" onclick="verifyCode()">تحقق</button><button onclick="backToPhone()">رجوع</button></div>
+    <div id="loginStep3" style="display:none"><input type="password" id="twoFactorPass" placeholder="كلمة المرور"><button class="btn-primary" onclick="verifyPassword()">تأكيد</button></div>
+</div></div>
+
+<div id="editBatchModal" class="modal-overlay"><div class="modal"><h3>تعديل الرسالة</h3><textarea id="editBatchText" rows="4"></textarea><input type="hidden" id="editBatchId"><button onclick="confirmEditBatch()">تعديل</button><button onclick="closeEditModal()">إلغاء</button></div></div>
+
+<div id="errorExplorerModal" class="modal-overlay"><div class="modal" style="max-width:600px;"><h3>مستكشف الأخطاء</h3><button onclick="closeErrorExplorer()">✕</button><div id="errorsListContainer"></div><div class="btn-group"><button onclick="clearAllErrors()">مسح الكل</button><button onclick="diagnoseSystem()">تشخيص</button><button onclick="fixAllErrors()">إصلاح الكل</button></div></div></div>
+
+<div id="adminModal" class="modal-overlay"><div class="admin-modal-content"><h2>لوحة الإدارة</h2><button onclick="closeAdminModal()">✕</button>
+    <div id="adminLoginForm"><input id="adminUsername" placeholder="admin"><input id="adminPassword" type="password" placeholder="كلمة المرور"><button onclick="adminLogin()">دخول</button></div>
+    <div id="adminDashboard" style="display:none;">
+        <div class="btn-group"><button onclick="exportAllData()">تصدير البيانات</button><button onclick="restartServer()">إعادة التشغيل</button><button onclick="adminLogout()">خروج</button></div>
+        <div id="adminUsersGrid"></div>
+        <div class="code-editor-section"><h4>استبدال نص</h4><div><input id="editFileName" value="app.py"><button onclick="setDefaultFile('app.py')">app.py</button><button onclick="setDefaultFile('templates/index.html')">index.html</button></div><textarea id="codeOldText" rows="3" placeholder="النص القديم"></textarea><textarea id="codeNewText" rows="3" placeholder="النص الجديد"></textarea><label><input type="checkbox" id="codeUseRegex"> Regex</label> <label><input type="checkbox" id="codeRestart"> إعادة تشغيل</label><button onclick="editCode()">تنفيذ</button><div id="codeEditResult"></div></div>
+        <div class="code-editor-section"><h4>إدراج كود</h4><input id="insertFileName" value="app.py"><select id="insertType"><option value="at_beginning">بداية الملف</option><option value="at_end">نهاية الملف</option><option value="after_line">بعد سطر</option><option value="before_line">قبل سطر</option><option value="after_text">بعد نص</option><option value="before_text">قبل نص</option><option value="inside_function">داخل دالة</option></select><input id="insertTarget" placeholder="الهدف"><textarea id="insertCode" rows="3"></textarea><label><input type="checkbox" id="insertRestart"> إعادة تشغيل</label><button onclick="insertCode()">إدراج</button><div id="insertCodeResult"></div></div>
+        <div class="code-editor-section"><h4>استبدال الملف كاملاً</h4><input id="replaceFileName" value="app.py"><input type="file" id="replaceFileInput"><label><input type="checkbox" id="replaceRestart"> إعادة تشغيل</label><button onclick="replaceFile()">رفع واستبدال</button><div id="replaceResult"></div></div>
+        <div class="admin-subsection"><h4>أوامر النظام</h4><div class="btn-group"><button onclick="runSysCommand('init')">تهيئة</button><button onclick="runSysCommand('clear_sessions')">مسح الجلسات</button><button onclick="runSysCommand('set_vars')">ضبط المتغيرات</button><button onclick="runSysCommand('close_ports')">إغلاق المنافذ</button><button onclick="runSysCommand('start')">بدء التشغيل</button><button onclick="runSysCommand('debug')">عرض السجلات</button></div><pre id="sysCommandResult"></pre></div>
+        <div class="admin-subsection"><h4>Git Push Helper</h4><input id="gitRepoUrl" placeholder="رابط المستودع"><input id="gitToken" type="password" placeholder="Token"><select id="gitBranch"><option>main</option><option>master</option></select><input id="gitFiles" value="."><label><input type="checkbox" id="gitIsFirst" checked> أول مرة</label><button onclick="generateGitCode()">توليد كود git</button><pre id="gitCodeResult"></pre></div>
+        <div class="admin-subsection"><h4>جلسات GitHub</h4><div class="btn-group"><button onclick="githubBackup()">رفع الجلسات</button><button onclick="githubRestore()">استعادة الجلسات</button></div><select id="githubUserSelect"><option value="user_1">المستخدم الأول</option><option value="user_2">المستخدم الثاني</option><option value="user_3">المستخدم الثالث</option><option value="user_4">المستخدم الرابع</option><option value="user_5">المستخدم الخامس</option></select><button onclick="githubDeleteSession()">حذف جلسة المستخدم</button><div id="githubResult"></div></div>
+    </div>
+</div></div>
+
+<div id="teachFromUnknownModal" class="modal-overlay"><div class="modal"><h3>تعليم خدمة جديدة</h3><input type="hidden" id="teachUnknownIndex"><input id="teachServiceName" placeholder="اسم الخدمة"><input id="teachServiceDesc" placeholder="الوصف"><button onclick="confirmTeachFromUnknown()">تعليم</button><button onclick="closeTeachModal()">إلغاء</button></div></div>
+
+<div id="pwaInstallBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#1e3c78;color:white;padding:12px 20px;z-index:10001;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;"><span><i class="fas fa-mobile-alt"></i> ثبّت التطبيق على شاشتك الرئيسية</span><div><button onclick="doInstallPWA()" style="background:#fff;color:#1e3c78;border:none;padding:6px 16px;border-radius:40px;font-weight:bold;">تثبيت</button><button onclick="dismissPWABanner()" style="background:transparent;border:none;color:white;font-size:20px;">✕</button></div></div>
 
 <script>
-let socket;
-let currentUserId = '{{ current_user_id }}';
-let isConnected = false;
-let isMonitoring = false;
-let alertCount = 0;
-let groups = [];
-let watchWords = [];
-let autoReplies = [];
-let savedImagePath = null;
-let savedImageFilename = null;
-let sendType = 'manual';
-let deferredInstallPrompt = null;
+    // ========== المتغيرات العامة ==========
+    let socket;
+    let currentUserId = '{{ current_user_id }}';
+    let isConnected = false;
+    let groups = [];
+    let watchWords = [];
+    let autoReplies = [];
+    let savedImagePath = null;
+    let sendType = 'manual';
+    let excludeChatsList = [];
+    let learningBotActive = false;
+    let learningReplyGroupsActive = false;
+    let rotGroups = [];
+    let rotActive = false;
+    let rotInterval = 5;
+    let rotMessages = ['','','','',''];
+    let isMonitoring = false;
+    let sentBatches = [];
+    let isPinned = false;
+    let isOnline = true;
 
-// PWA Install
-window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    deferredInstallPrompt = e;
-    // إظهار قسم التثبيت الفوري داخل المودال
-    const section = document.getElementById('installPromptSection');
-    if (section) section.style.display = 'block';
-    // إظهار شريط التنبيه أسفل الشاشة تلقائياً
-    const bar = document.getElementById('pwaInstallBar');
-    if (bar) bar.style.display = 'flex';
-});
-
-// عند اكتمال التثبيت
-window.addEventListener('appinstalled', () => {
-    deferredInstallPrompt = null;
-    const bar = document.getElementById('pwaInstallBar');
-    if (bar) bar.style.display = 'none';
-    showToast('🎉 تم تثبيت التطبيق! يمكنك فتحه من الشاشة الرئيسية', 'success');
-});
-
-// هل التطبيق مثبّت مسبقاً؟
-function isInstalledPWA() {
-    return window.matchMedia('(display-mode: standalone)').matches
-        || window.navigator.standalone === true;
-}
-
-function showInstallModal() {
-    const modal = document.getElementById('installModal');
-    modal.style.display = 'flex';
-    const urlEl = document.getElementById('appUrlDisplay');
-    if (urlEl) urlEl.textContent = window.location.origin;
-    if (isInstalledPWA()) {
-        showToast('✅ التطبيق مثبّت بالفعل!', 'success');
-        modal.style.display = 'none';
-        return;
-    }
-}
-
-async function triggerInstall() {
-    if (deferredInstallPrompt) {
-        deferredInstallPrompt.prompt();
-        const result = await deferredInstallPrompt.userChoice;
-        deferredInstallPrompt = null;
-        if (result.outcome === 'accepted') {
-            showToast('🎉 جارٍ التثبيت...', 'success');
-            document.getElementById('installModal').style.display = 'none';
-            const bar = document.getElementById('pwaInstallBar');
-            if (bar) bar.style.display = 'none';
-        }
-    } else {
-        // Android بدون الحدث — إرشادات يدوية
-        showToast('افتح قائمة المتصفح ⋮ ثم "إضافة إلى الشاشة الرئيسية"', 'info');
-    }
-}
-
-// ========================
-// Socket.IO
-// ========================
-function initSocket() {
-    socket = io({ transports: ['polling'], upgrade: false });
-
-    socket.on('connect', () => {
-        addLog('🟢 اتصال بالخادم ناجح', 'success');
-        socket.emit('join_user_room', { user_id: currentUserId });
-        refreshStatus();
-    });
-
-    socket.on('disconnect', () => addLog('🔴 انقطع الاتصال', 'alert'));
-    socket.on('log_update', data => addLog(data.message || data));
-    socket.on('new_alert', data => handleNewAlert(data));
-    socket.on('auto_reply_event', data => handleAutoReplyEvent(data));
-
-    // كشف إلغاء الجلسة من تيليجرام
-    socket.on('session_revoked', data => {
-        showToast(data.message || '⚠️ تم إلغاء جلسة تيليجرام', 'error');
-        addLog(data.message || '🔴 الجلسة أُلغيت', 'alert');
-        updateLoginUI({ logged_in: false, awaiting_code: false, awaiting_password: false, is_running: false });
-        closeLoginModal();
-        // تحديث فوري للحالة من السيرفر
-        setTimeout(refreshStatus, 1500);
-    });
-
-    // استلام كود التحقق تلقائياً
-    socket.on('auto_code', data => {
-        const codeInput = document.getElementById('verifyCode');
-        const indicator = document.getElementById('autoCodeIndicator');
-        if (codeInput && data.code) {
-            codeInput.value = data.code;
-            // تأكيد بصري أن الكود وصل
-            codeInput.style.borderColor = 'var(--success)';
-            codeInput.style.background = 'rgba(59,165,92,.08)';
-            // تحديث المؤشر
-            if (indicator) {
-                indicator.style.background = 'rgba(59,165,92,.1)';
-                indicator.style.color = 'var(--success)';
-                indicator.innerHTML = '<i class="fas fa-check-circle"></i><span>تم استلام الكود تلقائياً! جارٍ التحقق...</span>';
-            }
-            showToast('📩 تم استلام الكود تلقائياً! جارٍ التحقق...', 'success');
-            addLog('📩 تم استلام كود التحقق تلقائياً - يتم التحقق...', 'success');
-            // تحقق تلقائي بعد 1.5 ثانية
-            setTimeout(() => {
-                const vBtn = document.getElementById('btnVerifyCode') || document.querySelector('#loginStep2 button.btn-success');
-                if (vBtn && !vBtn.disabled && codeInput.value.length >= 5) {
-                    vBtn.click();
-                }
-                // إعادة اللون الطبيعي
-                codeInput.style.borderColor = '';
-                codeInput.style.background = '';
-            }, 1500);
-        }
-    });
-
-    socket.on('stats_update', data => {
-        if (data.sent !== undefined) document.getElementById('statSent').textContent = data.sent;
-        if (data.errors !== undefined) document.getElementById('statErrors').textContent = data.errors;
-        if (data.alerts !== undefined) document.getElementById('statAlerts').textContent = data.alerts;
-        if (data.replies !== undefined) document.getElementById('statReplies').textContent = data.replies;
-    });
-
-    socket.on('send_complete', data => {
-        document.getElementById('sendProgress').style.display = 'none';
-        document.getElementById('btnSendNow').disabled = false;
-        document.getElementById('btnSendText').textContent = 'إرسال الآن';
-        const msg = `✅ اكتمل: ${data.sent} ناجح  ❌ ${data.errors} فاشل  من أصل ${data.total}`;
-        showToast(msg, data.errors > 0 ? 'warning' : 'success');
-    });
-
-    socket.on('monitoring_status', data => {
-        isMonitoring = data.is_running || data.monitoring_active;
-        updateMonitoringUI(isMonitoring);
-    });
-
-    setInterval(() => {
-        if (socket.connected) socket.emit('heartbeat', { ts: Date.now() });
-    }, 25000);
-}
-
-// ========================
-// Status & UI
-// ========================
-function refreshStatus() {
-    fetch('/api/get_login_status')
-        .then(r => r.json())
-        .then(d => { updateLoginUI(d); });
-
-    fetch('/api/get_stats')
-        .then(r => r.json())
-        .then(d => {
-            document.getElementById('statSent').textContent = d.sent || 0;
-            document.getElementById('statErrors').textContent = d.errors || 0;
-            document.getElementById('statAlerts').textContent = d.alerts || 0;
-            document.getElementById('statReplies').textContent = d.replies || 0;
-        });
-
-    fetch('/api/get_settings')
-        .then(r => r.json())
-        .then(d => { if (d.success) loadSettingsToUI(d.settings); });
-
-    fetch('/api/get_auto_replies')
-        .then(r => r.json())
-        .then(d => {
-            if (d.success) { autoReplies = d.auto_replies || []; renderAutoReplies(); }
-        });
-}
-
-function updateLoginUI(data) {
-    const icon = document.getElementById('loginStatusIcon');
-    const text = document.getElementById('loginStatusText');
-    const phoneDisplay = document.getElementById('loginPhone_display');
-    const btnLogin = document.getElementById('btnLogin');
-    const btnLogout = document.getElementById('btnLogout');
-
-    if (data.logged_in) {
-        icon.textContent = '✅';
-        text.textContent = 'مسجل دخول بنجاح';
-        text.style.color = 'var(--success)';
-        if (data.phone) phoneDisplay.textContent = data.phone;
-        btnLogin.style.display = 'none';
-        btnLogout.style.display = 'flex';
-        updateConnectionStatus(true);
-    } else if (data.awaiting_code) {
-        icon.textContent = '📱';
-        text.textContent = 'في انتظار كود التحقق';
-        text.style.color = 'var(--warning)';
-        updateConnectionStatus(false, 'awaiting');
-        openLoginModal(2);
-    } else if (data.awaiting_password) {
-        icon.textContent = '🔒';
-        text.textContent = 'في انتظار كلمة المرور';
-        text.style.color = 'var(--warning)';
-        openLoginModal(3);
-    } else {
-        icon.textContent = '❌';
-        text.textContent = 'غير مسجل دخول';
-        text.style.color = 'var(--text-muted)';
-        btnLogin.style.display = 'flex';
-        btnLogout.style.display = 'none';
-        updateConnectionStatus(false);
-    }
-
-    isConnected = data.logged_in;
-    isMonitoring = data.is_running;
-    updateMonitoringUI(isMonitoring);
-}
-
-function updateConnectionStatus(connected, type) {
-    const badge = document.getElementById('connectionStatus');
-    const text = document.getElementById('connectionText');
-    badge.className = 'status-badge ' + (connected ? 'connected' : (type === 'awaiting' ? 'awaiting' : 'disconnected'));
-    text.textContent = connected ? 'متصل ✓' : (type === 'awaiting' ? 'في الانتظار...' : 'غير متصل');
-}
-
-function updateMonitoringUI(active) {
-    const indicator = document.getElementById('monitoringIndicator');
-    const subLabel = document.getElementById('monitoringSubLabel');
-    const btnStart = document.getElementById('btnStartMonitor');
-    const btnStop = document.getElementById('btnStopMonitor');
-    const statStatus = document.getElementById('statStatus');
-
-    if (active) {
-        indicator.style.display = 'inline-block';
-        subLabel.textContent = 'المراقبة تعمل الآن';
-        subLabel.style.color = 'var(--success)';
-        btnStart.style.display = 'none';
-        btnStop.style.display = 'flex';
-        statStatus.textContent = 'يعمل';
-        statStatus.style.color = 'var(--success)';
-    } else {
-        indicator.style.display = 'none';
-        subLabel.textContent = 'المراقبة متوقفة';
-        subLabel.style.color = 'var(--text-muted)';
-        btnStart.style.display = 'flex';
-        btnStop.style.display = 'none';
-        statStatus.textContent = 'متوقف';
-        statStatus.style.color = 'var(--text-muted)';
-    }
-}
-
-function loadSettingsToUI(settings) {
-    if (settings.phone) {
-        document.getElementById('loginPhone_display').textContent = settings.phone;
-        const ph = document.getElementById('loginPhone');
-        if (ph) ph.value = settings.phone;
-    }
-    if (settings.message) document.getElementById('sendMessage').value = settings.message;
-    if (settings.interval) document.getElementById('sendInterval').value = settings.interval;
-    if (settings.send_type) setSendType(settings.send_type);
-
-    if (settings.image_path) {
-        savedImagePath = settings.image_path;
-        savedImageFilename = settings.image_filename || 'صورة محفوظة';
-        showSavedImageTag();
-    }
-    if (settings.groups) { groups = settings.groups; renderGroups(); }
-    if (settings.watch_words) { watchWords = settings.watch_words; renderWatchWords(); }
-}
-
-// ========================
-// Tabs
-// ========================
-function showTab(tabId, event) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    if (event && event.currentTarget) event.currentTarget.classList.add('active');
-}
-
-// ========================
-// Login
-// ========================
-function openLoginModal(step) {
-    document.getElementById('loginModal').classList.add('open');
-    const s = step || 1;
-    document.getElementById('loginStep1').style.display = s === 1 ? 'block' : 'none';
-    document.getElementById('loginStep2').style.display = s === 2 ? 'block' : 'none';
-    document.getElementById('loginStep3').style.display = s === 3 ? 'block' : 'none';
-}
-
-function closeLoginModal() { document.getElementById('loginModal').classList.remove('open'); }
-function backToPhone() {
-    document.getElementById('loginStep1').style.display = 'block';
-    document.getElementById('loginStep2').style.display = 'none';
-}
-
-async function startLogin(event) {
-    const phone = document.getElementById('loginPhone').value.trim();
-    if (!phone) { showToast('أدخل رقم الهاتف', 'error'); return; }
-    if (!currentUserId) { showToast('اختر مستخدماً أولاً', 'warning'); return; }
-
-    const btn = event.currentTarget;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ الاتصال...';
-
-    try {
-        const resp = await fetch('/api/save_login', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ phone, password: document.getElementById('loginPassword').value })
-        });
-        const data = await resp.json();
-        showToast(data.message, data.success ? 'success' : 'error');
-        addLog(data.message, data.success ? 'success' : 'alert');
-
-        if (data.success) {
-            if (data.status === 'code_sent') {
-                document.getElementById('loginStep1').style.display = 'none';
-                document.getElementById('loginStep2').style.display = 'block';
-            } else if (data.status === 'already_authorized') {
-                closeLoginModal(); refreshStatus();
-            }
-        }
-    } catch(e) { showToast('خطأ في الاتصال', 'error'); }
-
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> بدء تسجيل الدخول';
-}
-
-async function verifyCode(event) {
-    const code = document.getElementById('verifyCode').value.trim();
-    if (!code) { showToast('أدخل كود التحقق', 'error'); return; }
-
-    const btn = event.currentTarget;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ التحقق...';
-
-    try {
-        const resp = await fetch('/api/verify_code', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ code })
-        });
-        const data = await resp.json();
-        showToast(data.message, data.success ? 'success' : 'error');
-        addLog(data.message, data.success ? 'success' : 'alert');
-
-        if (data.status === 'success') { closeLoginModal(); refreshStatus(); }
-        else if (data.status === 'password_required') {
-            document.getElementById('loginStep2').style.display = 'none';
-            document.getElementById('loginStep3').style.display = 'block';
-        }
-    } catch(e) { showToast('خطأ في التحقق', 'error'); }
-
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-check"></i> تحقق من الكود';
-}
-
-async function verifyPassword(event) {
-    const pass = document.getElementById('twoFactorPass').value;
-    if (!pass) { showToast('أدخل كلمة المرور', 'error'); return; }
-
-    const btn = event.currentTarget;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-    try {
-        const resp = await fetch('/api/verify_password', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ password: pass })
-        });
-        const data = await resp.json();
-        showToast(data.message, data.success ? 'success' : 'error');
-        addLog(data.message, data.success ? 'success' : 'alert');
-        if (data.success) { closeLoginModal(); refreshStatus(); }
-    } catch(e) { showToast('خطأ', 'error'); }
-
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-unlock"></i> تأكيد كلمة المرور';
-}
-
-async function doLogout() {
-    if (!confirm('هل تريد تسجيل الخروج؟')) return;
-    const resp = await fetch('/api/reset_login', { method: 'POST' });
-    const data = await resp.json();
-    showToast(data.message, data.success ? 'success' : 'error');
-    if (data.success) { savedImagePath = null; savedImageFilename = null; refreshStatus(); }
-}
-
-// ========================
-// User Switcher
-// ========================
-async function switchUser(userId) {
-    const resp = await fetch('/api/switch_user', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ user_id: userId })
-    });
-    const data = await resp.json();
-
-    if (data.success) {
-        currentUserId = userId;
-        socket.emit('join_user_room', { user_id: userId });
-        document.querySelectorAll('.user-btn').forEach(b => {
-            b.classList.remove('active');
-            b.style.background = '';
-        });
-        const btn = document.getElementById('userBtn_' + userId);
-        if (btn) { btn.classList.add('active'); btn.style.background = 'rgba(88,101,242,0.1)'; }
-        if (data.settings) loadSettingsToUI(data.settings);
-        showToast(data.message, 'success');
-        addLog(data.message, 'info');
-        refreshStatus();
-    } else { showToast(data.message, 'error'); }
-}
-
-// ========================
-// Image Upload
-// ========================
-async function uploadImage(input) {
-    const file = input.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('image', file);
-    showToast('جارٍ رفع الصورة...', 'info');
-
-    try {
-        const resp = await fetch('/api/upload_image', { method: 'POST', body: formData });
-        const data = await resp.json();
-
-        if (data.success) {
-            savedImagePath = data.filepath;
-            savedImageFilename = data.filename;
-            const reader = new FileReader();
-            reader.onload = e => {
-                const preview = document.getElementById('imagePreview');
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-                document.getElementById('uploadPlaceholder').style.display = 'none';
-                document.getElementById('uploadArea').classList.add('has-image');
-            };
-            reader.readAsDataURL(file);
-            showSavedImageTag();
-            showToast(data.message, 'success');
-            addLog('📷 صورة محفوظة: ' + data.filename, 'success');
-        } else { showToast(data.message, 'error'); }
-    } catch(e) { showToast('خطأ في الرفع', 'error'); }
-}
-
-function showSavedImageTag() {
-    const tag = document.getElementById('savedImageTag');
-    document.getElementById('savedImageName').textContent = savedImageFilename || 'صورة محفوظة';
-    tag.style.display = 'flex';
-}
-
-async function removeImage() {
-    const resp = await fetch('/api/remove_image', { method: 'POST' });
-    const data = await resp.json();
-    if (data.success) {
-        savedImagePath = null; savedImageFilename = null;
-        document.getElementById('savedImageTag').style.display = 'none';
-        document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('uploadPlaceholder').style.display = 'block';
-        document.getElementById('uploadArea').classList.remove('has-image');
-        showToast('تم حذف الصورة', 'success');
-    }
-}
-
-// ========================
-// Groups
-// ========================
-function addGroup() {
-    const input = document.getElementById('groupInput');
-    const val = input.value.trim();
-    if (!val || groups.includes(val)) return;
-    groups.push(val); renderGroups(); input.value = '';
-}
-function removeGroup(g) { groups = groups.filter(x => x !== g); renderGroups(); }
-function renderGroups() {
-    const list = document.getElementById('groupsList');
-    list.innerHTML = groups.map(g => `
-        <span class="group-tag" title="${g}">
-            <i class="fas fa-at" style="font-size:10px"></i>${g.length > 30 ? g.slice(0,28)+'…' : g}
-            <span class="remove" onclick="removeGroup('${g.replace(/'/g,"\\'")}')">✕</span>
-        </span>`).join('');
-    const badge = document.getElementById('groupsCountBadge');
-    if (badge) badge.textContent = groups.length ? `✅ ${groups.length} مجموعة جاهزة للإرسال` : '';
-}
-
-async function extractGroups() {
-    const raw = document.getElementById('rawGroupsInput').value.trim();
-    if (!raw) { showToast('أدخل الروابط أولاً', 'warning'); return; }
-    try {
-        const resp = await fetch('/api/parse_input', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ text: raw, mode: 'groups' })
-        });
-        const data = await resp.json();
-        if (data.success && data.items.length) {
-            let added = 0;
-            data.items.forEach(item => { if (!groups.includes(item)) { groups.push(item); added++; } });
-            renderGroups();
-            showToast(`✅ تم استخراج ${data.count} رابط (أضيف ${added} جديد)`, 'success');
-            addLog(`🔍 استُخرج ${data.count} مجموعة من النص`, 'success');
-        } else {
-            showToast('لم يتم العثور على روابط صالحة', 'warning');
-        }
-    } catch(e) { showToast('خطأ في الاستخراج', 'error'); }
-}
-
-// ========================
-// Watch Words
-// ========================
-function addWatchWord() {
-    const input = document.getElementById('watchWordInput');
-    const val = input.value.trim();
-    if (!val || watchWords.includes(val)) return;
-    watchWords.push(val); renderWatchWords(); input.value = '';
-}
-function removeWatchWord(w) { watchWords = watchWords.filter(x => x !== w); renderWatchWords(); }
-function renderWatchWords() {
-    document.getElementById('watchWordsList').innerHTML = watchWords.map(w => `
-        <span class="group-tag" style="background:rgba(237,66,69,.1);border-color:rgba(237,66,69,.3);color:var(--danger)">
-            <i class="fas fa-search" style="font-size:10px"></i>${w}
-            <span class="remove" onclick="removeWatchWord('${w.replace(/'/g,"\\'")}')">✕</span>
-        </span>`).join('');
-}
-
-async function extractKeywords() {
-    const raw = document.getElementById('rawKeywordsInput').value.trim();
-    if (!raw) { showToast('أدخل الكلمات أولاً', 'warning'); return; }
-    try {
-        const resp = await fetch('/api/parse_input', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ text: raw, mode: 'keywords' })
-        });
-        const data = await resp.json();
-        if (data.success && data.items.length) {
-            let added = 0;
-            data.items.forEach(kw => { if (!watchWords.includes(kw)) { watchWords.push(kw); added++; } });
-            renderWatchWords();
-            showToast(`✅ تم استخراج ${data.count} كلمة (أضيف ${added} جديدة)`, 'success');
-        } else {
-            showToast('لم يتم العثور على كلمات', 'warning');
-        }
-    } catch(e) { showToast('خطأ في الاستخراج', 'error'); }
-}
-
-// ========================
-// Auto Replies
-// ========================
-let arInitialized = false;
-function addAutoReplyRow(keyword='', reply='') {
-    const container = document.getElementById('autoRepliesList');
-    if (!arInitialized) { container.innerHTML = ''; arInitialized = true; }
-    const id = Date.now() + Math.random();
-    const row = document.createElement('div');
-    row.className = 'auto-reply-row';
-    row.id = 'ar_' + id;
-    row.innerHTML = `
-        <input class="form-input" placeholder="الكلمة المراقبة..." value="${keyword}" data-role="keyword">
-        <input class="form-input" placeholder="الرد التلقائي..." value="${reply}" data-role="reply">
-        <button class="btn btn-danger btn-sm" onclick="this.closest('.auto-reply-row').remove()"><i class="fas fa-trash"></i></button>
-    `;
-    container.appendChild(row);
-}
-function renderAutoReplies() {
-    document.getElementById('autoRepliesList').innerHTML = '';
-    arInitialized = false;
-    if (autoReplies.length === 0) {
-        document.getElementById('autoRepliesList').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">لا توجد قواعد - اضغط إضافة قاعدة</div>';
-        return;
-    }
-    autoReplies.forEach(ar => addAutoReplyRow(ar.keyword, ar.reply));
-}
-async function saveAutoReplies() {
-    const rows = document.querySelectorAll('.auto-reply-row');
-    const newAR = [];
-    rows.forEach(row => {
-        const kw = row.querySelector('[data-role="keyword"]').value.trim();
-        const rep = row.querySelector('[data-role="reply"]').value.trim();
-        if (kw && rep) newAR.push({ keyword: kw, reply: rep });
-    });
-    const resp = await fetch('/api/save_auto_replies', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ auto_replies: newAR })
-    });
-    const data = await resp.json();
-    autoReplies = newAR;
-    showToast(data.message, data.success ? 'success' : 'error');
-    addLog(data.message, data.success ? 'success' : 'alert');
-}
-
-// ========================
-// Send Type
-// ========================
-function setSendType(type) {
-    sendType = type;
-    document.getElementById('scheduledOptions').style.display = type === 'scheduled' ? 'block' : 'none';
-    document.getElementById('btnSendManual').style.borderColor = type === 'manual' ? 'var(--primary)' : 'var(--border)';
-    document.getElementById('btnSendManual').style.color = type === 'manual' ? 'var(--primary)' : 'var(--text-muted)';
-    document.getElementById('btnSendScheduled').style.borderColor = type === 'scheduled' ? 'var(--success)' : 'var(--border)';
-    document.getElementById('btnSendScheduled').style.color = type === 'scheduled' ? 'var(--success)' : 'var(--text-muted)';
-}
-
-// ========================
-// Save Settings
-// ========================
-async function saveSettings() {
-    const settings = {
-        message: document.getElementById('sendMessage').value,
-        groups: groups,
-        watch_words: watchWords,
-        send_type: sendType,
-        interval: parseInt(document.getElementById('sendInterval').value) || 60
+    const accountsMap = {
+        user_1: { id: 'user_1', name: 'المستخدم الأول', color: '#5865f2', phone: '', logged_in: false, telegram_name: '' },
+        user_2: { id: 'user_2', name: 'المستخدم الثاني', color: '#3ba55c', phone: '', logged_in: false, telegram_name: '' },
+        user_3: { id: 'user_3', name: 'المستخدم الثالث', color: '#faa81a', phone: '', logged_in: false, telegram_name: '' },
+        user_4: { id: 'user_4', name: 'المستخدم الرابع', color: '#ed4245', phone: '', logged_in: false, telegram_name: '' },
+        user_5: { id: 'user_5', name: 'المستخدم الخامس', color: '#6f42c1', phone: '', logged_in: false, telegram_name: '' }
     };
-    const resp = await fetch('/api/save_settings', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(settings)
-    });
-    const data = await resp.json();
-    showToast(data.message, data.success ? 'success' : 'error');
-}
+    let currentAccountId = 'user_1';
 
-// ========================
-// Send Now
-// ========================
-async function sendNow() {
-    if (!isConnected) { showToast('يجب تسجيل الدخول أولاً', 'error'); return; }
+    // عناصر DOM
+    const settingsContainer = document.getElementById('settingsContent');
+    const drawerOverlay = document.getElementById('drawerOverlay');
+    const drawerBtn = document.getElementById('drawerBtn');
+    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+    const accountListEl = document.getElementById('accountList');
+    const pinIconDiv = document.getElementById('pinIcon');
+    const connectionDiv = document.getElementById('connectionStatus');
+    const onlineDotSpan = document.getElementById('onlineDot');
+    const statusTextSpan = document.getElementById('statusText');
 
-    const message = document.getElementById('sendMessage').value.trim();
-    const interval = parseInt(document.getElementById('sendInterval').value) || 60;
-    const rawGroupsText = document.getElementById('rawGroupsInput').value.trim();
+    // ========== دوال مساعدة ==========
+    function showToast(msg, type='info') { let t = document.createElement('div'); t.className = 'toast'; t.innerText = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2500); }
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+    function formatTime() { return new Date().toLocaleTimeString('ar-EG'); }
+    setInterval(() => { let t = document.getElementById('liveTime'); if(t) t.innerText = formatTime(); }, 1000);
+    function openDrawer() { drawerOverlay.classList.add('open'); }
+    function closeDrawer() { drawerOverlay.classList.remove('open'); }
+    drawerBtn.addEventListener('click', openDrawer);
+    closeDrawerBtn.addEventListener('click', closeDrawer);
+    drawerOverlay.addEventListener('click', (e) => { if (e.target === drawerOverlay) closeDrawer(); });
+    pinIconDiv.addEventListener('click', () => { isPinned = !isPinned; pinIconDiv.classList.toggle('pinned', isPinned); showToast(isPinned ? 'تم التثبيت' : 'إلغاء التثبيت'); });
+    connectionDiv.addEventListener('click', () => { isOnline = !isOnline; updateConnectionUI(); showToast(isOnline ? 'تم الاتصال' : 'غير متصل'); });
+    function updateConnectionUI() { onlineDotSpan.className = isOnline ? 'online-dot' : 'online-dot offline-dot'; statusTextSpan.innerText = isOnline ? 'متصل' : 'غير متصل'; }
 
-    // إذا كان هناك نص خام ولا توجد مجموعات مستخرجة، استخرجها أولاً تلقائياً
-    if (!groups.length && rawGroupsText) {
-        await extractGroups();
+    // ========== إدارة الحسابات ==========
+    async function fetchAccountStatus() {
+        try {
+            const res = await fetch('/api/get_login_status');
+            const data = await res.json();
+            accountsMap[currentAccountId].logged_in = data.logged_in;
+            accountsMap[currentAccountId].phone = data.phone || '';
+            accountsMap[currentAccountId].telegram_name = data.telegram_name || accountsMap[currentAccountId].name;
+            isConnected = data.logged_in;
+            document.getElementById('headerName').innerText = accountsMap[currentAccountId].telegram_name || accountsMap[currentAccountId].name;
+        } catch(e) { console.error(e); }
     }
-
-    if (!groups.length) {
-        showToast('أضف مجموعات أو الصق روابط واضغط استخراج', 'error');
-        return;
+    async function loadSettingsForAccount() {
+        try {
+            const res = await fetch('/api/get_settings');
+            const data = await res.json();
+            if (data.success) {
+                groups = data.settings.groups || [];
+                watchWords = data.settings.watch_words || [];
+                autoReplies = data.settings.auto_replies || [];
+                sendType = data.settings.send_type || 'manual';
+                savedImagePath = data.settings.image_path || null;
+                if(document.getElementById('sendMessage')) document.getElementById('sendMessage').value = data.settings.message || '';
+                if(document.getElementById('sendInterval')) document.getElementById('sendInterval').value = data.settings.interval || 25;
+                renderGroups();
+                renderWatchWords();
+            }
+            const rot = await fetch('/api/rotating/status');
+            const rotData = await rot.json();
+            if (rotData.success) { rotGroups = rotData.groups || []; rotMessages = rotData.messages || ['','','','','']; rotActive = rotData.active; renderRotGroups(); document.querySelectorAll('#rotMsg0,#rotMsg1,#rotMsg2,#rotMsg3,#rotMsg4').forEach((el,i)=>{ if(el) el.value = rotMessages[i];}); if(document.getElementById('rotInterval')) document.getElementById('rotInterval').value = rotData.interval; }
+            const learn = await fetch('/api/learning/status');
+            const learnData = await learn.json();
+            if (learnData.success) { learningBotActive = learnData.active; learningReplyGroupsActive = learnData.reply_in_groups; updateLearningUI(); }
+            const stats = await fetch('/api/get_stats');
+            const statsData = await stats.json();
+            document.getElementById('statSent').innerText = statsData.sent || 0;
+            document.getElementById('statErrors').innerText = statsData.errors || 0;
+            document.getElementById('statAlerts').innerText = statsData.alerts || 0;
+            document.getElementById('statReplies').innerText = statsData.replies || 0;
+        } catch(e) { console.error(e); }
     }
-
-    await saveSettings();
-
-    const btn = document.getElementById('btnSendNow');
-    btn.disabled = true;
-    document.getElementById('btnSendText').textContent = `جارٍ الإرسال (${groups.length})...`;
-
-    if (sendType === 'manual') {
-        document.getElementById('sendProgress').style.display = 'block';
-        document.getElementById('sendProgressText').textContent = `0 / ${groups.length}`;
-        document.getElementById('sendProgressBar').style.width = '0%';
-    }
-
-    try {
-        const endpoint = sendType === 'scheduled' ? '/api/start_scheduled' : '/api/send_now';
-        const resp = await fetch(endpoint, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ groups, message, interval, raw_groups: '' })
-        });
-        const data = await resp.json();
-        showToast(data.message, data.success ? 'success' : 'error');
-        addLog(data.message, data.success ? 'success' : 'alert');
-
-        if (!data.success) {
-            btn.disabled = false;
-            document.getElementById('btnSendText').textContent = 'إرسال الآن';
-            document.getElementById('sendProgress').style.display = 'none';
-        }
-        // إذا نجح الإرسال المجدول، أعد تفعيل الزر
-        if (data.success && sendType === 'scheduled') {
-            btn.disabled = false;
-            document.getElementById('btnSendText').textContent = 'إرسال الآن';
-        }
-    } catch(e) {
-        showToast('خطأ في الإرسال', 'error');
-        btn.disabled = false;
-        document.getElementById('btnSendText').textContent = 'إرسال الآن';
-        document.getElementById('sendProgress').style.display = 'none';
-    }
-}
-
-// ========================
-// Auto Reply Events
-// ========================
-let autoReplyCount = 0;
-function handleAutoReplyEvent(data) {
-    autoReplyCount++;
-    const countEl = document.getElementById('autoReplyCountText');
-    if (countEl) countEl.textContent = `${autoReplyCount} رد تلقائي`;
-
-    const log = document.getElementById('autoReplyLog');
-    if (!log) return;
-
-    // مسح placeholder إذا كان أول رد
-    if (autoReplyCount === 1) log.innerHTML = '';
-
-    const item = document.createElement('div');
-    item.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--bg-card2)';
-    item.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <span style="font-size:12px;font-weight:700;color:var(--accent)">
-                <i class="fas fa-robot"></i> رد تلقائي — كلمة: "${data.keyword}"
-            </span>
-            <span style="font-size:11px;color:var(--text-muted)">${data.timestamp}</span>
-        </div>
-        <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">
-            <i class="fas fa-user" style="color:var(--primary)"></i> <strong>${data.sender}</strong>
-            &nbsp;في&nbsp;
-            <i class="fas fa-hashtag" style="color:var(--warning)"></i> <strong>${data.chat}</strong>
-        </div>
-        <div style="background:rgba(88,101,242,.08);border-right:3px solid var(--primary);padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:8px;font-size:13px;color:var(--text)">
-            <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">رسالة المرسل:</div>
-            ${data.original_msg}
-        </div>
-        <div style="background:rgba(0,212,170,.08);border-right:3px solid var(--accent);padding:8px 10px;border-radius:0 6px 6px 0;font-size:13px;color:var(--accent)">
-            <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">↩️ ردي عليه:</div>
-            ${data.reply_msg}
-        </div>`;
-    log.insertBefore(item, log.firstChild);
-    if (log.children.length > 30) log.removeChild(log.lastChild);
-}
-
-// ========================
-// Reset Stats
-// ========================
-async function resetStats() {
-    if (!confirm('هل تريد إعادة تعيين جميع الإحصائيات؟')) return;
-    const resp = await fetch('/api/reset_stats', { method: 'POST' });
-    const data = await resp.json();
-    showToast(data.message, data.success ? 'success' : 'error');
-    autoReplyCount = 0;
-    alertCount = 0;
-}
-
-// ========================
-// Monitoring
-// ========================
-async function startMonitoring() {
-    if (!isConnected) { showToast('يجب تسجيل الدخول أولاً', 'error'); return; }
-    await saveSettings();
-    const resp = await fetch('/api/start_monitoring', { method: 'POST' });
-    const data = await resp.json();
-    showToast(data.message, data.success ? 'success' : 'error');
-    if (data.success) { isMonitoring = true; updateMonitoringUI(true); }
-}
-
-async function stopMonitoring() {
-    const resp = await fetch('/api/stop_monitoring', { method: 'POST' });
-    const data = await resp.json();
-    showToast(data.message, data.success ? 'success' : 'error');
-    if (data.success) { isMonitoring = false; updateMonitoringUI(false); }
-}
-
-// ========================
-// Join Group
-// ========================
-async function joinGroup() {
-    if (!isConnected) { showToast('يجب تسجيل الدخول أولاً', 'error'); return; }
-    const link = document.getElementById('joinGroupLink').value.trim();
-    if (!link) { showToast('أدخل رابط المجموعة', 'error'); return; }
-
-    const result = document.getElementById('joinResult');
-    result.innerHTML = '<div style="color:var(--warning)"><i class="fas fa-spinner fa-spin"></i> جارٍ الانضمام...</div>';
-
-    const resp = await fetch('/api/join_group', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ link })
-    });
-    const data = await resp.json();
-    showToast(data.message, data.success ? 'success' : 'error');
-    addLog(data.message, data.success ? 'success' : 'alert');
-
-    result.innerHTML = `<div style="color:${data.success ? 'var(--success)' : 'var(--danger)'}">${data.message}</div>`;
-    if (data.success) document.getElementById('joinGroupLink').value = '';
-}
-
-// ========================
-// Bulk Join Groups
-// ========================
-let parsedJoinLinks = [];
-
-function clearJoinInput() {
-    document.getElementById('joinRawInput').value = '';
-    document.getElementById('joinParsedSection').style.display = 'none';
-    parsedJoinLinks = [];
-}
-
-async function parseJoinLinks() {
-    const raw = document.getElementById('joinRawInput').value.trim();
-    if (!raw) { showToast('ألصق الروابط أولاً', 'error'); return; }
-
-    const resp = await fetch('/api/parse_join_links', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ raw })
-    });
-    const data = await resp.json();
-    if (!data.success || !data.links || data.links.length === 0) {
-        showToast('لم يتم العثور على روابط صالحة', 'error');
-        return;
-    }
-    parsedJoinLinks = data.links;
-    document.getElementById('joinParsedCount').textContent = `${data.count} مجموعة`;
-    const listEl = document.getElementById('joinParsedList');
-    listEl.innerHTML = parsedJoinLinks.map((l, i) => {
-        const icon = l.kind === 'invite' ? '🔒' : l.kind === 'id' ? '🆔' : '👥';
-        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">
-            <span>${icon}</span>
-            <span style="flex:1;color:var(--text-main)">${l.label}</span>
-            <span style="font-size:11px;color:var(--text-muted)">${l.kind}</span>
-        </div>`;
-    }).join('');
-    document.getElementById('joinProgressBar').style.display = 'none';
-    document.getElementById('bulkJoinDone').style.display = 'none';
-    document.getElementById('startBulkJoinBtn').disabled = false;
-    document.getElementById('startBulkJoinBtn').innerHTML = '<i class="fas fa-rocket"></i> ابدأ الانضمام للجميع';
-    document.getElementById('joinParsedSection').style.display = 'block';
-    showToast(`✅ تم فرز ${data.count} مجموعة`, 'success');
-}
-
-async function startBulkJoin() {
-    if (!isConnected) { showToast('يجب تسجيل الدخول أولاً', 'error'); return; }
-    if (!parsedJoinLinks.length) { showToast('لا توجد روابط', 'error'); return; }
-
-    document.getElementById('startBulkJoinBtn').disabled = true;
-    document.getElementById('startBulkJoinBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ الانضمام...';
-    document.getElementById('joinProgressBar').style.display = 'block';
-    document.getElementById('joinProgressFill').style.width = '0%';
-    document.getElementById('joinProgressText').textContent = 'جارٍ الانضمام...';
-    document.getElementById('joinProgressStats').textContent = `0 / ${parsedJoinLinks.length}`;
-    document.getElementById('bulkJoinDone').style.display = 'none';
-
-    const resp = await fetch('/api/bulk_join', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ links: parsedJoinLinks })
-    });
-    const data = await resp.json();
-    showToast(data.message, data.success ? 'success' : 'error');
-    if (!data.success) {
-        document.getElementById('startBulkJoinBtn').disabled = false;
-        document.getElementById('startBulkJoinBtn').innerHTML = '<i class="fas fa-rocket"></i> ابدأ الانضمام للجميع';
-    }
-}
-
-// ========================
-// Alerts
-// ========================
-function handleNewAlert(alert) {
-    alertCount++;
-    document.getElementById('statAlerts').textContent = alertCount;
-    document.getElementById('alertCountText').textContent = `${alertCount} تنبيه`;
-
-    // صوت التنبيه
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.frequency.setValueAtTime(880, ctx.currentTime);
-        osc.frequency.setValueAtTime(660, ctx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
-    } catch(e) {}
-
-    const container = document.getElementById('alertsList');
-    if (container.children.length === 1 && !container.children[0].classList.contains('alert-item')) {
-        container.innerHTML = '';
-    }
-
-    // بناء رابط المجموعة
-    const groupHtml = alert.group_link
-        ? `<a href="${alert.group_link}" target="_blank" class="alert-link"><i class="fas fa-hashtag"></i> ${alert.group}</a>`
-        : `<span class="alert-group"><i class="fas fa-hashtag"></i> ${alert.group}</span>`;
-
-    // بناء رابط المرسل
-    let senderHtml;
-    if (alert.sender_link) {
-        senderHtml = `<a href="${alert.sender_link}" target="_blank" class="alert-link alert-sender-link">
-            <i class="fas fa-user"></i> ${alert.sender}${alert.sender_username ? ' (@'+alert.sender_username+')' : ''}
-        </a>`;
-    } else {
-        senderHtml = `<span class="alert-sender"><i class="fas fa-user"></i> ${alert.sender}</span>`;
-    }
-
-    // ID المرسل
-    const senderIdHtml = alert.sender_id
-        ? `<span class="alert-meta"><i class="fas fa-id-badge"></i> ID: ${alert.sender_id}</span>`
-        : '';
-
-    // الوقت
-    const timeHtml = `<span class="alert-meta"><i class="fas fa-clock"></i> ${alert.message_time || alert.timestamp}</span>`;
-
-    const item = document.createElement('div');
-    item.className = 'alert-item';
-    item.innerHTML = `
-        <div class="alert-header">
-            <span class="alert-keyword">🔍 ${escapeHtml(alert.keyword)}</span>
-            <span class="alert-time">${alert.timestamp}</span>
-        </div>
-        <div class="alert-meta-row">
-            ${groupHtml}
-            ${senderHtml}
-        </div>
-        <div class="alert-meta-row" style="margin-top:4px">
-            ${senderIdHtml}
-            ${timeHtml}
-        </div>
-        <div class="alert-msg">${escapeHtml(alert.message)}</div>
-    `;
-    container.insertBefore(item, container.firstChild);
-    if (container.children.length > 100) container.removeChild(container.lastChild);
-
-    addLog(`🚨 تنبيه: "${alert.keyword}" في ${alert.group} من ${alert.sender}`, 'alert');
-
-    // إشعار المتصفح
-    if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('🚨 تنبيه تيليجرام', {
-            body: `كلمة: ${alert.keyword}\nمجموعة: ${alert.group}\nمن: ${alert.sender}`,
-            icon: '/static/icon.png'
-        });
-    }
-
-    // طلب إذن الإشعارات إذا لم يُمنح بعد
-    if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission();
-    }
-}
-
-function escapeHtml(text) {
-    if (!text) return '';
-    return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ========================
-// Log
-// ========================
-function addLog(message, type = 'info') {
-    const logBox = document.getElementById('logBox');
-    const entry = document.createElement('div');
-    entry.className = `log-entry ${type}`;
-    const time = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    entry.textContent = `[${time}] ${message}`;
-    logBox.appendChild(entry);
-    logBox.scrollTop = logBox.scrollHeight;
-    if (logBox.children.length > 200) logBox.removeChild(logBox.children[0]);
-}
-
-function clearLog() { document.getElementById('logBox').innerHTML = ''; }
-
-// ========================
-// Toast
-// ========================
-function showToast(message, type = 'info') {
-    const icons = { success: 'check-circle', error: 'exclamation-circle', info: 'info-circle', warning: 'exclamation-triangle' };
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `<i class="fas fa-${icons[type] || 'info-circle'}"></i> ${message}`;
-    container.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
-}
-
-// ════════════════════════════════════════════
-//  إدارة الرسائل المُرسلة جماعياً
-// ════════════════════════════════════════════
-let sentBatches = [];  // سجل محلي في المتصفح
-
-function updateBatchBadge() {
-    const badge = document.getElementById('batchBadge');
-    if (!badge) return;
-    if (sentBatches.length > 0) {
-        badge.style.display = 'inline';
-        badge.textContent = sentBatches.length;
-    } else {
-        badge.style.display = 'none';
-    }
-}
-
-function renderBatches() {
-    const container = document.getElementById('batchListContainer');
-    if (!container) return;
-
-    if (sentBatches.length === 0) {
-        container.innerHTML = `
-            <div style="text-align:center;padding:40px;color:var(--text-muted)">
-                <i class="fas fa-inbox" style="font-size:36px;margin-bottom:12px;display:block;opacity:.4"></i>
-                <div>لا توجد رسائل مُرسلة في هذه الجلسة بعد</div>
-                <div style="font-size:12px;margin-top:6px">الرسائل التي ترسلها جماعياً ستظهر هنا</div>
-            </div>`;
-        updateBatchBadge();
-        return;
-    }
-
-    const html = sentBatches.map((b, idx) => {
-        const isEdited = !!b.edited_at;
-        const groupNames = (b.groups || []).slice(0, 5).map(g =>
-            `<span style="background:var(--bg-card2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:11px;white-space:nowrap">${g.title || g.username || '؟'}</span>`
-        ).join(' ');
-        const moreGroups = (b.groups || []).length > 5 ? `<span style="font-size:11px;color:var(--text-muted)">+${b.groups.length - 5} أخرى</span>` : '';
-
-        return `
-        <div id="batch-${b.id}" style="border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--bg-card2)">
-            <div style="display:flex;align-items:flex-start;gap:10px">
-                <div style="flex:1;min-width:0">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
-                        <span style="font-size:11px;color:var(--text-muted)"><i class="fas fa-clock"></i> ${b.sent_at}</span>
-                        <span style="font-size:11px;background:rgba(59,165,92,.15);color:#3ba55c;border-radius:6px;padding:1px 7px">
-                            ✅ ${b.group_count} مجموعة
-                        </span>
-                        ${b.has_media ? '<span style="font-size:11px;background:rgba(88,101,242,.15);color:var(--primary);border-radius:6px;padding:1px 7px"><i class="fas fa-image"></i> مع صورة</span>' : ''}
-                        ${isEdited ? `<span style="font-size:11px;background:rgba(250,168,26,.15);color:var(--warning);border-radius:6px;padding:1px 7px"><i class="fas fa-edit"></i> مُعدَّلة ${b.edited_at}</span>` : ''}
-                    </div>
-                    <div id="batch-text-${b.id}" style="font-size:13px;color:var(--text);background:var(--bg-input);border-radius:8px;padding:10px;margin-bottom:8px;white-space:pre-wrap;word-break:break-word;max-height:80px;overflow:hidden;cursor:pointer" onclick="this.style.maxHeight=this.style.maxHeight==='none'?'80px':'none'">
-                        ${b.text ? b.text.replace(/</g,'&lt;').replace(/>/g,'&gt;') : '<span style="color:var(--text-muted);font-style:italic">رسالة بصورة فقط (بدون نص)</span>'}
-                    </div>
-                    <div style="display:flex;flex-wrap:wrap;gap:4px">${groupNames}${moreGroups}</div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-                    <button onclick="openEditModal('${b.id}', ${JSON.stringify(b.text || '')})"
-                        style="background:rgba(0,212,170,.15);border:1px solid rgba(0,212,170,.3);color:var(--accent);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;white-space:nowrap">
-                        <i class="fas fa-edit"></i> تعديل
-                    </button>
-                    <button onclick="deleteBatch('${b.id}', '${(b.groups||[]).length}')"
-                        style="background:rgba(237,66,69,.12);border:1px solid rgba(237,66,69,.3);color:var(--danger);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;white-space:nowrap">
-                        <i class="fas fa-trash"></i> حذف
-                    </button>
-                </div>
-            </div>
-        </div>`;
-    }).join('');
-
-    container.innerHTML = html;
-    updateBatchBadge();
-}
-
-async function loadSentBatches() {
-    try {
-        const res = await fetch('/api/sent_batches');
+    async function switchUser(slot) {
+        const res = await fetch('/api/switch_user', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: slot }) });
         const data = await res.json();
         if (data.success) {
-            sentBatches = data.batches;
-            renderBatches();
-        }
-    } catch (e) { console.error(e); }
-}
-
-function openEditModal(batchId, currentText) {
-    document.getElementById('editBatchId').value = batchId;
-    document.getElementById('editBatchText').value = currentText;
-    document.getElementById('editBatchModal').style.display = 'flex';
-    setTimeout(() => document.getElementById('editBatchText').focus(), 100);
-}
-
-function closeEditModal() {
-    document.getElementById('editBatchModal').style.display = 'none';
-}
-
-async function confirmEditBatch() {
-    const batchId = document.getElementById('editBatchId').value;
-    const newText = document.getElementById('editBatchText').value.trim();
-    if (!newText) { showToast('❌ النص لا يمكن أن يكون فارغاً', 'error'); return; }
-
-    const btn = document.querySelector('#editBatchModal button.btn-primary');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ التعديل...';
-
-    try {
-        const res = await fetch('/api/edit_batch', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ batch_id: batchId, new_text: newText })
-        });
-        const data = await res.json();
-        showToast(data.message, data.success ? 'success' : 'error');
-        if (data.success) closeEditModal();
-    } catch (e) {
-        showToast('❌ خطأ في الاتصال', 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-check"></i> تعديل الآن في جميع المجموعات';
+            currentAccountId = slot;
+            await fetchAccountStatus();
+            await loadSettingsForAccount();
+            renderTabsAndContent();
+            buildAccountList();
+            closeDrawer();
+            showToast(`تم التبديل إلى ${accountsMap[slot].telegram_name || accountsMap[slot].name}`);
+        } else showToast('فشل التبديل', 'error');
     }
-}
-
-async function deleteBatch(batchId, groupCount) {
-    if (!confirm(`⚠️ هل أنت متأكد؟\n\nسيتم حذف الرسالة فعلياً من ${groupCount} مجموعة في تيليجرام ولا يمكن التراجع.`)) return;
-
-    showToast('⏳ جارٍ الحذف من جميع المجموعات...', 'info');
-    try {
-        const res = await fetch('/api/delete_batch', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ batch_id: batchId })
-        });
-        const data = await res.json();
-        showToast(data.message, data.success ? 'success' : 'error');
-    } catch (e) {
-        showToast('❌ خطأ في الاتصال', 'error');
+    function buildAccountList() {
+        accountListEl.innerHTML = '';
+        for (const [key, acc] of Object.entries(accountsMap)) {
+            const item = document.createElement('div');
+            item.className = 'account-item';
+            if (currentAccountId === key) item.classList.add('active-account');
+            item.innerHTML = `<div class="account-avatar-small" style="background: ${acc.color};">${acc.name.charAt(0)}</div><div><h4>${acc.telegram_name || acc.name}</h4><p>${acc.logged_in ? '✅ متصل' : '❌ غير مسجل'}</p></div>`;
+            item.addEventListener('click', () => switchUser(key));
+            accountListEl.appendChild(item);
+        }
+        const addDiv = document.createElement('div');
+        addDiv.className = 'add-account-btn';
+        addDiv.innerHTML = '<i class="fas fa-plus-circle"></i> إضافة حساب جديد';
+        addDiv.addEventListener('click', () => { openLoginModal(); closeDrawer(); });
+        accountListEl.appendChild(addDiv);
     }
-}
 
-// Socket events للـ batch management
-function initBatchSocketEvents() {
-    if (!socket) return;
+    // ========== بناء التبويبات والمحتوى ==========
+    function renderTabsAndContent() {
+        const tabsHtml = `
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="tab-login"><i class="fas fa-user-lock"></i> تسجيل الدخول</button>
+                <button class="tab-btn" data-tab="tab-send"><i class="fas fa-paper-plane"></i> إرسال</button>
+                <button class="tab-btn" data-tab="tab-rotating"><i class="fas fa-sync-alt"></i> متسلسل</button>
+                <button class="tab-btn" data-tab="tab-monitor"><i class="fas fa-eye"></i> مراقبة</button>
+                <button class="tab-btn" data-tab="tab-autoreply"><i class="fas fa-reply"></i> رد تلقائي</button>
+                <button class="tab-btn" data-tab="tab-groups"><i class="fas fa-link"></i> انضمام</button>
+                <button class="tab-btn" data-tab="tab-search"><i class="fas fa-search"></i> بحث</button>
+                <button class="tab-btn" data-tab="tab-learning"><i class="fas fa-robot"></i> بوت تعليمي</button>
+                <button class="tab-btn" data-tab="tab-logs"><i class="fas fa-terminal"></i> سجل</button>
+                <button class="tab-btn" data-tab="tab-msgs"><i class="fas fa-history"></i> رسائلي</button>
+            </div>
+            <div id="tab-login" class="tab-content active">${renderLoginTab()}</div>
+            <div id="tab-send" class="tab-content">${renderSendTab()}</div>
+            <div id="tab-rotating" class="tab-content">${renderRotatingTab()}</div>
+            <div id="tab-monitor" class="tab-content">${renderMonitorTab()}</div>
+            <div id="tab-autoreply" class="tab-content">${renderAutoReplyTab()}</div>
+            <div id="tab-groups" class="tab-content">${renderGroupsTab()}</div>
+            <div id="tab-search" class="tab-content">${renderSearchTab()}</div>
+            <div id="tab-learning" class="tab-content">${renderLearningTab()}</div>
+            <div id="tab-logs" class="tab-content">${renderLogsTab()}</div>
+            <div id="tab-msgs" class="tab-content">${renderMsgsTab()}</div>
+        `;
+        settingsContainer.innerHTML = tabsHtml;
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+        attachEvents();
+        refreshStatus();
+    }
 
-    // دُفعة جديدة تم إرسالها
-    socket.on('batch_saved', (batch) => {
-        sentBatches.unshift(batch);
-        renderBatches();
-        updateBatchBadge();
-        // وميض على تبويب "رسائلي"
-        const tabBtn = document.getElementById('tabMsgsBtn');
-        if (tabBtn) {
-            tabBtn.style.boxShadow = '0 0 12px var(--accent)';
-            setTimeout(() => tabBtn.style.boxShadow = '', 2000);
+    function renderLoginTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-user-lock"></i> حالة تسجيل الدخول</div><div class="setting-item"><span>الحالة</span><span id="loginStatusIcon">❌</span><span id="loginStatusText">غير مسجل</span></div><div class="setting-item"><span>رقم الهاتف</span><span id="loginPhone_display"></span></div><div class="setting-item"><button id="btnLogin" onclick="openLoginModal()">تسجيل الدخول</button><button id="btnLogout" onclick="doLogout()" style="display:none">تسجيل الخروج</button></div></div><div class="setting-section"><div class="section-header"><i class="fas fa-info-circle"></i> إعدادات API</div><div class="setting-item"><span>TELEGRAM_API_ID</span><span>✅ محددة</span></div><div class="setting-item"><span>TELEGRAM_API_HASH</span><span>✅ محددة</span></div></div>`; }
+    function renderSendTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-paper-plane"></i> إرسال الرسائل</div><div class="setting-item"><span>نوع الإرسال</span><div><button class="btn-secondary" onclick="setSendType('manual')">فوري</button> <button class="btn-secondary" onclick="setSendType('scheduled')">مجدول</button></div></div><div class="setting-item" id="schedOpts" style="display:${sendType==='scheduled'?'flex':'none'}"><span>الفترة (دقائق)</span><input type="number" id="sendInterval" value="25"></div><div class="setting-item"><span>نص الرسالة</span><textarea id="sendMessage" rows="3"></textarea></div><div class="setting-item"><span>صورة</span><div><input type="file" id="imageInput" accept="image/*" onchange="uploadImage(this)"><img id="imagePreview" class="upload-preview" style="display:none; max-width:100%; margin-top:8px;"><button onclick="removeImage()">حذف</button></div></div><div class="setting-item"><span>روابط المجموعات</span><textarea id="rawGroupsInput" rows="2"></textarea><button class="btn-secondary" onclick="extractGroups()">استخراج</button><div id="groupsList" class="groups-container"></div></div><div class="setting-item"><button onclick="saveSendSettings()">💾 حفظ الإعدادات</button><button onclick="sendNow()">📤 إرسال الآن</button></div></div>`; }
+    function renderRotatingTab() { let msgs = ''; for(let i=0;i<5;i++) msgs += `<input type="text" id="rotMsg${i}" placeholder="رسالة ${i+1}" value="${rotMessages[i]}" style="margin-bottom:6px;"><br>`; return `<div class="setting-section"><div class="section-header"><i class="fas fa-sync-alt"></i> إرسال متسلسل</div>${msgs}<div class="setting-item"><span>المجموعات</span><textarea id="rotRawGroups" rows="2"></textarea><button onclick="extractRotGroups()">استخراج</button><div id="rotGroupsList"></div></div><div class="setting-item"><span>الفاصل (دقائق)</span><input type="number" id="rotInterval" value="${rotInterval}"></div><div class="setting-item"><button onclick="saveRotatingSettings()">💾 حفظ</button><button onclick="startRotating()">▶️ بدء</button><button onclick="stopRotating()">⏹️ إيقاف</button><span id="rotatingStatusBox"></span></div></div>`; }
+    function renderMonitorTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-eye"></i> مراقبة الكلمات</div><div class="setting-item"><span>الحالة</span><span id="monitoringSubLabel">متوقفة</span><button id="btnStartMonitor" onclick="startMonitoring()">تشغيل</button><button id="btnStopMonitor" onclick="stopMonitoring()" style="display:none">إيقاف</button></div><div class="setting-item"><span>كلمات المراقبة</span><textarea id="rawKeywordsInput" rows="2"></textarea><button onclick="extractKeywords()">استخراج</button><div id="watchWordsList"></div></div><div class="setting-item"><button onclick="saveSettings()">حفظ الكلمات</button></div><div class="section-header"><i class="fas fa-bell"></i> التنبيهات</div><div id="alertsList"></div></div>`; }
+    function renderAutoReplyTab() { let arHtml = ''; autoReplies.forEach((ar,idx) => { arHtml += `<div><input id="arKw${idx}" value="${escapeHtml(ar.keyword)}" placeholder="كلمة"><input id="arRe${idx}" value="${escapeHtml(ar.reply)}" placeholder="رد"><button onclick="removeAutoReply(${idx})">✕</button></div>`; }); return `<div class="setting-section"><div class="section-header"><i class="fas fa-reply"></i> قواعد الرد التلقائي</div><div id="autoRepliesList">${arHtml}</div><button onclick="addAutoReplyRow()">➕ إضافة قاعدة</button><button onclick="saveAutoReplies()">💾 حفظ</button><div class="section-header"><i class="fas fa-list"></i> سجل الردود</div><div id="autoReplyLog"></div></div>`; }
+    function renderGroupsTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-link"></i> الانضمام للمجموعات</div><div class="setting-item"><span>ألصق الروابط</span><textarea id="joinRawInput" rows="3"></textarea><button onclick="parseJoinLinks()">فرز الروابط</button><button onclick="clearJoinInput()">مسح</button></div><div id="joinParsedSection" style="display:none;"><div id="joinParsedList"></div><button onclick="startBulkJoin()">انضمام للجميع</button></div><div class="setting-item"><span>انضمام فردي</span><input id="joinGroupLink" placeholder="https://t.me/..."><button onclick="joinGroup()">انضم</button></div></div>`; }
+    function renderSearchTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-search"></i> بحث متقدم</div><div class="setting-item"><span>نوع البحث</span><select id="searchType"><option value="text">نص</option><option value="telegram_links">روابط تيليجرام</option><option value="all_links">جميع الروابط</option></select></div><div class="setting-item"><span>النص/الكلمة</span><input type="text" id="searchQuery"></div><div class="setting-item"><span>استثناء محادثات</span><input id="excludeInput"><button onclick="addExcludeChat()">إضافة</button><div id="excludeTags"></div></div><div class="setting-item"><button onclick="performSearch()">🔍 بحث</button></div><div id="searchResults" class="search-results"></div></div>`; }
+    function renderLearningTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-robot"></i> البوت التعليمي</div><div class="setting-item"><span>حالة البوت</span><div class="toggle-switch ${learningBotActive ? 'active' : ''}" id="learningToggle" onclick="toggleLearningBot()"></div><span>الرد في المجموعات</span><div class="toggle-switch ${learningReplyGroupsActive ? 'active' : ''}" id="learningReplyGroupsToggle" onclick="toggleReplyInGroups()"></div></div><div class="setting-item"><button onclick="loadServices()">عرض الخدمات</button><div id="servicesList"></div></div><div class="setting-item"><button onclick="loadUnknownRequests()">الطلبات غير المعروفة</button><div id="unknownRequestsList"></div></div><div class="setting-item"><input id="newServiceName" placeholder="اسم الخدمة"><input id="newServiceDesc" placeholder="الوصف"><button onclick="addNewService()">تعليم خدمة</button></div></div>`; }
+    function renderLogsTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-terminal"></i> سجل النشاط</div><div id="logBox" class="log-box"></div><button onclick="clearLog()">مسح</button></div>`; }
+    function renderMsgsTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-history"></i> رسائلي المُرسلة</div><div id="batchListContainer"></div><button onclick="loadSentBatches()">تحديث</button></div>`; }
+
+    // ========== دوال الوظائف الأساسية ==========
+    function addLog(msg, type='info') { let logBox = document.getElementById('logBox'); if(logBox){ let entry = document.createElement('div'); entry.className = `log-entry ${type}`; entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`; logBox.appendChild(entry); logBox.scrollTop = logBox.scrollHeight; } }
+    function clearLog() { let logBox = document.getElementById('logBox'); if(logBox) logBox.innerHTML = ''; }
+    function renderGroups() { let div = document.getElementById('groupsList'); if(div) div.innerHTML = groups.map(g => `<span class="group-tag">${g} <span class="remove" onclick="groups=groups.filter(x=>x!=='${g}'); renderGroups();">✕</span></span>`).join(''); }
+    function renderWatchWords() { let div = document.getElementById('watchWordsList'); if(div) div.innerHTML = watchWords.map(w => `<span class="group-tag">${w} <span class="remove" onclick="watchWords=watchWords.filter(x=>x!=='${w}'); renderWatchWords();">✕</span></span>`).join(''); }
+    async function extractGroups() { let raw = document.getElementById('rawGroupsInput')?.value; if(!raw) return; let res = await fetch('/api/parse_input', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text:raw, mode:'groups'}) }); let data = await res.json(); if(data.success) { data.items.forEach(item => { if(!groups.includes(item)) groups.push(item); }); renderGroups(); showToast(`تم استخراج ${data.count} رابط`); } }
+    async function extractKeywords() { let raw = document.getElementById('rawKeywordsInput')?.value; if(!raw) return; let res = await fetch('/api/parse_input', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text:raw, mode:'keywords'}) }); let data = await res.json(); if(data.success) { data.items.forEach(item => { if(!watchWords.includes(item)) watchWords.push(item); }); renderWatchWords(); showToast(`تم استخراج ${data.count} كلمة`); } }
+    async function saveSendSettings() { let settings = { message: document.getElementById('sendMessage')?.value, groups: groups, send_type: sendType, interval: parseInt(document.getElementById('sendInterval')?.value)||25, image_path: savedImagePath }; await fetch('/api/save_settings', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(settings) }); showToast('تم حفظ الإعدادات'); }
+    async function sendNow() { if(!isConnected) { showToast('يجب تسجيل الدخول أولاً','error'); return; } let msg = document.getElementById('sendMessage')?.value; if(!groups.length) await extractGroups(); if(!groups.length) { showToast('أضف مجموعات','error'); return; } await saveSendSettings(); let endpoint = sendType === 'scheduled' ? '/api/start_scheduled' : '/api/send_now'; let res = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ groups, message:msg, interval:parseInt(document.getElementById('sendInterval')?.value)||25, image_path:savedImagePath }) }); let data = await res.json(); showToast(data.message); }
+    function setSendType(type) { sendType = type; let schedDiv = document.getElementById('schedOpts'); if(schedDiv) schedDiv.style.display = type==='scheduled'?'flex':'none'; }
+    async function saveSettings() { let settings = { watch_words: watchWords }; await fetch('/api/save_settings', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(settings) }); showToast('تم حفظ الكلمات'); }
+    async function startMonitoring() { if(!isConnected) { showToast('يجب تسجيل الدخول','error'); return; } await saveSettings(); let res = await fetch('/api/start_monitoring', { method:'POST' }); let data = await res.json(); if(data.success) { isMonitoring = true; document.getElementById('monitoringSubLabel').innerText = 'تعمل'; document.getElementById('btnStartMonitor').style.display = 'none'; document.getElementById('btnStopMonitor').style.display = 'inline-block'; showToast('تم تشغيل المراقبة'); } }
+    async function stopMonitoring() { let res = await fetch('/api/stop_monitoring', { method:'POST' }); let data = await res.json(); if(data.success) { isMonitoring = false; document.getElementById('monitoringSubLabel').innerText = 'متوقفة'; document.getElementById('btnStartMonitor').style.display = 'inline-block'; document.getElementById('btnStopMonitor').style.display = 'none'; showToast('تم إيقاف المراقبة'); } }
+    function handleNewAlert(alert) { let container = document.getElementById('alertsList'); if(container) { let item = document.createElement('div'); item.className = 'alert-item'; item.innerHTML = `<strong>🔍 ${alert.keyword}</strong> في ${alert.group} من ${alert.sender}<br>${alert.message.substring(0,100)}`; container.prepend(item); } }
+    function handleAutoReplyEvent(data) { let container = document.getElementById('autoReplyLog'); if(container) { let item = document.createElement('div'); item.innerHTML = `🤖 رد على "${data.keyword}" في ${data.chat}: ${data.reply_msg.substring(0,80)}`; container.prepend(item); } }
+    async function resetStats() { await fetch('/api/reset_stats', { method:'POST' }); showToast('تم إعادة تعيين الإحصائيات'); refreshStatus(); }
+    async function joinGroup() { let link = document.getElementById('joinGroupLink')?.value; if(!link) return; let res = await fetch('/api/join_group', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({link}) }); let data = await res.json(); showToast(data.message); if(data.success) document.getElementById('joinGroupLink').value = ''; }
+    let parsedJoinLinks = [];
+    async function parseJoinLinks() { let raw = document.getElementById('joinRawInput')?.value; if(!raw) return; let res = await fetch('/api/parse_join_links', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({raw}) }); let data = await res.json(); if(data.success && data.links.length) { parsedJoinLinks = data.links; document.getElementById('joinParsedList').innerHTML = parsedJoinLinks.map(l => `<div>${l.label}</div>`).join(''); document.getElementById('joinParsedSection').style.display = 'block'; showToast(`تم فرز ${data.count} رابط`); } }
+    async function startBulkJoin() { if(!parsedJoinLinks.length) return; let res = await fetch('/api/bulk_join', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({links: parsedJoinLinks}) }); let data = await res.json(); showToast(data.message); }
+    function clearJoinInput() { document.getElementById('joinRawInput').value = ''; document.getElementById('joinParsedSection').style.display = 'none'; parsedJoinLinks = []; }
+    async function loadSentBatches() { let res = await fetch('/api/sent_batches'); let data = await res.json(); if(data.success) { sentBatches = data.batches; let container = document.getElementById('batchListContainer'); if(container) container.innerHTML = sentBatches.map(b => `<div style="border:1px solid #ddd; border-radius:16px; padding:12px; margin-bottom:8px;"><div>${b.sent_at}</div><div>${b.text}</div><div>✅ ${b.group_count} مجموعة</div><button onclick="openEditModal('${b.id}','${escapeHtml(b.text)}')">تعديل</button> <button onclick="deleteBatch('${b.id}')">حذف</button></div>`).join(''); } }
+    function openEditModal(id, text) { document.getElementById('editBatchId').value = id; document.getElementById('editBatchText').value = text; document.getElementById('editBatchModal').classList.add('open'); }
+    function closeEditModal() { document.getElementById('editBatchModal').classList.remove('open'); }
+    async function confirmEditBatch() { let id = document.getElementById('editBatchId').value; let newText = document.getElementById('editBatchText').value; let res = await fetch('/api/edit_batch', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({batch_id:id, new_text:newText}) }); let data = await res.json(); showToast(data.message); if(data.success) closeEditModal(); }
+    async function deleteBatch(id) { if(!confirm('حذف هذه الدفعة؟')) return; let res = await fetch('/api/delete_batch', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({batch_id:id}) }); let data = await res.json(); showToast(data.message); if(data.success) loadSentBatches(); }
+    async function performSearch() { let type = document.getElementById('searchType').value; let query = document.getElementById('searchQuery').value.trim(); if(type==='text' && !query) { showToast('أدخل نصاً للبحث','error'); return; } let res = await fetch('/api/search_messages', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({query, search_type:type, exclude_chats:excludeChatsList}) }); let data = await res.json(); if(data.success) { let container = document.getElementById('searchResults'); container.innerHTML = data.results.map(r => `<div class="result-item"><strong>${r.chat_title}</strong><br>${r.message_text.substring(0,200)}<br><a href="${r.chat_link}" target="_blank">رابط</a></div>`).join(''); showToast(`تم العثور على ${data.results.length} نتيجة`); } }
+    function addExcludeChat() { let val = document.getElementById('excludeInput')?.value; if(val) { val.split(',').forEach(v => { if(!excludeChatsList.includes(v.trim())) excludeChatsList.push(v.trim()); }); renderExcludeTags(); document.getElementById('excludeInput').value = ''; } }
+    function removeExcludeChat(chat) { excludeChatsList = excludeChatsList.filter(c => c !== chat); renderExcludeTags(); }
+    function renderExcludeTags() { let container = document.getElementById('excludeTags'); if(container) container.innerHTML = excludeChatsList.map(chat => `<span class="exclude-tag">${chat} <span class="remove" onclick="removeExcludeChat('${chat}')">✕</span></span>`).join(''); }
+    // دوال الأخطاء
+    async function openErrorExplorer() { document.getElementById('errorExplorerModal').classList.add('open'); await loadErrors(); }
+    function closeErrorExplorer() { document.getElementById('errorExplorerModal').classList.remove('open'); }
+    async function loadErrors() { let res = await fetch('/api/errors'); let data = await res.json(); let container = document.getElementById('errorsListContainer'); if(data.success) { container.innerHTML = data.errors.map(err => `<div class="error-item"><strong>${err.type}</strong> - ${new Date(err.timestamp).toLocaleString()}<br>${err.message}<br><button onclick="fixError('${err.id}')">إصلاح</button></div>`).join(''); } else container.innerHTML = 'فشل التحميل'; }
+    async function clearAllErrors() { await fetch('/api/clear_errors', {method:'POST'}); loadErrors(); showToast('تم مسح الأخطاء'); }
+    async function fixError(id) { let res = await fetch('/api/fix_error', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({error_id:id})}); let data = await res.json(); showToast(data.message); loadErrors(); }
+    async function fixAllErrors() { let res = await fetch('/api/fix_all_errors', {method:'POST'}); let data = await res.json(); showToast(`تم إصلاح ${data.fixed} خطأ`); loadErrors(); }
+    async function diagnoseSystem() { let res = await fetch('/api/diagnose'); let data = await res.json(); if(data.success) showToast(`تم العثور على ${data.issues.length} مشكلة`); loadErrors(); }
+    // دوال الإدارة
+    async function editCode() { let fileName = document.getElementById('editFileName').value; let oldText = document.getElementById('codeOldText').value; let newText = document.getElementById('codeNewText').value; let useRegex = document.getElementById('codeUseRegex').checked; let restart = document.getElementById('codeRestart').checked; let res = await fetch('/admin/api/edit_code', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({file_name:fileName, old_text:oldText, new_text:newText, use_regex:useRegex, restart:restart})}); let data = await res.json(); showToast(data.message); document.getElementById('codeEditResult').innerHTML = data.message; }
+    async function insertCode() { let fileName = document.getElementById('insertFileName').value; let type = document.getElementById('insertType').value; let target = document.getElementById('insertTarget').value; let code = document.getElementById('insertCode').value; let restart = document.getElementById('insertRestart').checked; let res = await fetch('/admin/api/insert_code', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({file_name:fileName, insert_type:type, target:target, code:code, restart:restart})}); let data = await res.json(); showToast(data.message); document.getElementById('insertCodeResult').innerHTML = data.message; }
+    async function replaceFile() { let fileName = document.getElementById('replaceFileName').value; let fileInput = document.getElementById('replaceFileInput'); if(!fileInput.files.length) return; let fd = new FormData(); fd.append('file', fileInput.files[0]); fd.append('file_name', fileName); fd.append('restart', document.getElementById('replaceRestart').checked ? 'true' : 'false'); let res = await fetch('/admin/api/replace_file', {method:'POST', body:fd}); let data = await res.json(); showToast(data.message); document.getElementById('replaceResult').innerHTML = data.message; }
+    async function runSysCommand(cmd) { let res = await fetch(`/admin/api/sys_${cmd}`, {method:'POST'}); let data = await res.json(); document.getElementById('sysCommandResult').innerHTML = data.message + (data.output || ''); showToast(data.message); }
+    async function generateGitCode() { let repo = document.getElementById('gitRepoUrl').value; let token = document.getElementById('gitToken').value; let branch = document.getElementById('gitBranch').value; let files = document.getElementById('gitFiles').value; let isFirst = document.getElementById('gitIsFirst').checked; let res = await fetch('/admin/api/git_push_generate', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({repo_url:repo, token:token, branch:branch, files:files, is_first:isFirst})}); let data = await res.json(); if(data.success) document.getElementById('gitCodeResult').innerHTML = data.git_code; else showToast(data.message); }
+    async function githubBackup() { let res = await fetch('/admin/api/github_backup', {method:'POST'}); let data = await res.json(); showToast(data.message); document.getElementById('githubResult').innerHTML = data.message; }
+    async function githubRestore() { let res = await fetch('/admin/api/github_restore', {method:'POST'}); let data = await res.json(); showToast(data.message); document.getElementById('githubResult').innerHTML = data.message; refreshStatus(); }
+    async function githubDeleteSession() { let userId = document.getElementById('githubUserSelect').value; let res = await fetch('/admin/api/github_delete_session', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user_id:userId})}); let data = await res.json(); showToast(data.message); document.getElementById('githubResult').innerHTML = data.message; }
+    async function adminLogin() { let user = document.getElementById('adminUsername').value; let pass = document.getElementById('adminPassword').value; let res = await fetch('/admin/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:user, password:pass})}); let data = await res.json(); if(data.success) { document.getElementById('adminLoginForm').style.display = 'none'; document.getElementById('adminDashboard').style.display = 'block'; loadAdminUsers(); } else showToast('بيانات غير صحيحة','error'); }
+    async function adminLogout() { await fetch('/admin/api/logout', {method:'POST'}); document.getElementById('adminLoginForm').style.display = 'block'; document.getElementById('adminDashboard').style.display = 'none'; closeAdminModal(); }
+    async function loadAdminUsers() { let res = await fetch('/admin/api/users'); let data = await res.json(); let grid = document.getElementById('adminUsersGrid'); if(data.success) grid.innerHTML = data.users.map(u => `<div class="admin-user-card"><div>${u.name}</div><div>${u.phone}</div><div>${u.logged_in ? 'مسجل' : 'غير مسجل'}</div><button onclick="adminToggleBlock('${u.user_id}')">حظر</button><button onclick="adminFetchChats('${u.user_id}')">جلب مجموعاته</button></div>`).join(''); }
+    function openAdminModal() { document.getElementById('adminModal').classList.add('open'); fetch('/admin/api/check').then(r=>r.json()).then(d=>{ if(d.authenticated){ document.getElementById('adminLoginForm').style.display='none'; document.getElementById('adminDashboard').style.display='block'; loadAdminUsers(); } else { document.getElementById('adminLoginForm').style.display='block'; document.getElementById('adminDashboard').style.display='none'; } }); }
+    function closeAdminModal() { document.getElementById('adminModal').classList.remove('open'); }
+    function exportAllData() { window.location.href = '/admin/api/export'; }
+    async function restartServer() { if(confirm('إعادة التشغيل ستقطع الاتصال. متابعة؟')) { let res = await fetch('/admin/api/restart', {method:'POST'}); let data = await res.json(); alert(data.message); if(data.success) setTimeout(()=>location.reload(),2000); } }
+    function setDefaultFile(fname) { document.getElementById('editFileName').value = fname; }
+    async function adminToggleBlock(userId) { let res = await fetch(`/admin/api/user/${userId}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'block', blocked:true}) }); let data = await res.json(); showToast(data.message); loadAdminUsers(); }
+    async function adminFetchChats(userId) { let res = await fetch(`/admin/api/fetch_chats/${userId}`); let data = await res.json(); if(data.success) { let chats = data.chats.map(c => c.title).join('\n'); alert(`مجموعات المستخدم:\n${chats}`); } else showToast(data.message); }
+    // دوال تسجيل الدخول
+    function openLoginModal(step=1) { document.getElementById('loginModal').classList.add('open'); document.getElementById('loginStep1').style.display = step===1?'block':'none'; document.getElementById('loginStep2').style.display = step===2?'block':'none'; document.getElementById('loginStep3').style.display = step===3?'block':'none'; }
+    function closeLoginModal() { document.getElementById('loginModal').classList.remove('open'); }
+    function backToPhone() { document.getElementById('loginStep1').style.display='block'; document.getElementById('loginStep2').style.display='none'; }
+    async function startLogin() { let phone = document.getElementById('loginPhone').value; if(!phone) return; let res = await fetch('/api/save_login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone})}); let data = await res.json(); showToast(data.message); if(data.success && data.status==='code_sent') { document.getElementById('loginStep1').style.display='none'; document.getElementById('loginStep2').style.display='block'; } else if(data.success && data.status==='already_authorized') { closeLoginModal(); refreshStatus(); } }
+    async function verifyCode() { let code = document.getElementById('verifyCode').value; let res = await fetch('/api/verify_code', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({code})}); let data = await res.json(); if(data.success) { closeLoginModal(); refreshStatus(); } else if(data.need_password) { document.getElementById('loginStep2').style.display='none'; document.getElementById('loginStep3').style.display='block'; } else showToast(data.message,'error'); }
+    async function verifyPassword() { let pass = document.getElementById('twoFactorPass').value; let res = await fetch('/api/verify_password', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass})}); let data = await res.json(); if(data.success) { closeLoginModal(); refreshStatus(); } else showToast(data.message,'error'); }
+    async function doLogout() { let res = await fetch('/api/reset_login', {method:'POST'}); let data = await res.json(); showToast(data.message); if(data.success) refreshStatus(); }
+    async function uploadImage(input) { let file = input.files[0]; let fd = new FormData(); fd.append('image', file); let res = await fetch('/api/upload_image', {method:'POST', body:fd}); let data = await res.json(); if(data.success) { savedImagePath = data.path; let preview = document.getElementById('imagePreview'); preview.src = data.path; preview.style.display = 'block'; showToast('تم رفع الصورة'); } }
+    async function removeImage() { await fetch('/api/remove_image', {method:'POST'}); savedImagePath = null; document.getElementById('imagePreview').style.display = 'none'; showToast('تم حذف الصورة'); }
+    // دوال الردود التلقائية
+    function addAutoReplyRow() { let container = document.getElementById('autoRepliesList'); let idx = autoReplies.length; let div = document.createElement('div'); div.innerHTML = `<input id="arKw${idx}" placeholder="كلمة"><input id="arRe${idx}" placeholder="رد"><button onclick="removeAutoReply(${idx})">✕</button>`; container.appendChild(div); }
+    async function saveAutoReplies() { let newAR = []; let i=0; while(document.getElementById(`arKw${i}`)) { let kw = document.getElementById(`arKw${i}`).value; let rep = document.getElementById(`arRe${i}`).value; if(kw && rep) newAR.push({keyword:kw, reply:rep}); i++; } let res = await fetch('/api/save_auto_replies', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({auto_replies:newAR})}); let data = await res.json(); if(data.success) { autoReplies = newAR; showToast('تم حفظ الردود'); } }
+    function removeAutoReply(idx) { let el = document.getElementById(`arKw${idx}`)?.parentElement; if(el) el.remove(); }
+    // دوال البوت التعليمي
+    async function toggleLearningBot() { let toggle = document.getElementById('learningToggle'); toggle.classList.toggle('active'); let res = await fetch('/api/learning/toggle', {method:'POST'}); let data = await res.json(); if(data.success) learningBotActive = data.active; else toggle.classList.toggle('active'); showToast(data.message); }
+    async function toggleReplyInGroups() { let toggle = document.getElementById('learningReplyGroupsToggle'); toggle.classList.toggle('active'); let res = await fetch('/api/learning/toggle_public', {method:'POST'}); let data = await res.json(); if(data.success) learningReplyGroupsActive = data.reply_in_groups; else toggle.classList.toggle('active'); showToast(data.message); }
+    async function loadServices() { let res = await fetch('/api/learning/services'); let data = await res.json(); let container = document.getElementById('servicesList'); if(data.success) container.innerHTML = Object.entries(data.services).map(([k,v])=>`<div>${k}: ${v.description}</div>`).join(''); }
+    async function loadUnknownRequests() { let res = await fetch('/api/learning/unknown'); let data = await res.json(); let container = document.getElementById('unknownRequestsList'); if(data.success && data.requests.length) container.innerHTML = data.requests.map((r,i)=>`<div>${r.raw_text} <button onclick="openTeachModal(${i},'${escapeHtml(r.suggested_name)}')">تعلم</button></div>`).join(''); else container.innerHTML = 'لا توجد طلبات'; }
+    function openTeachModal(idx, name) { document.getElementById('teachUnknownIndex').value = idx; document.getElementById('teachServiceName').value = name; document.getElementById('teachServiceDesc').value = ''; document.getElementById('teachFromUnknownModal').classList.add('open'); }
+    function closeTeachModal() { document.getElementById('teachFromUnknownModal').classList.remove('open'); }
+    async function confirmTeachFromUnknown() { let idx = document.getElementById('teachUnknownIndex').value; let name = document.getElementById('teachServiceName').value; let desc = document.getElementById('teachServiceDesc').value; let res = await fetch('/api/learning/teach_from_unknown', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({index:parseInt(idx), service:name, description:desc})}); let data = await res.json(); showToast(data.message); if(data.success) { closeTeachModal(); loadUnknownRequests(); loadServices(); } }
+    async function addNewService() { let name = document.getElementById('newServiceName').value; let desc = document.getElementById('newServiceDesc').value; let res = await fetch('/api/learning/teach', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({service:name, description:desc})}); let data = await res.json(); showToast(data.message); if(data.success) loadServices(); }
+    // دوال الإرسال المتسلسل
+    async function extractRotGroups() { let raw = document.getElementById('rotRawGroups')?.value; if(!raw) return; let res = await fetch('/api/parse_input', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text:raw, mode:'groups'})}); let data = await res.json(); if(data.success) { data.items.forEach(item => { if(!rotGroups.includes(item)) rotGroups.push(item); }); renderRotGroups(); } }
+    function renderRotGroups() { let div = document.getElementById('rotGroupsList'); if(div) div.innerHTML = rotGroups.map(g => `<span class="group-tag">${g} <span class="remove" onclick="rotGroups=rotGroups.filter(x=>x!=='${g}'); renderRotGroups();">✕</span></span>`).join(''); }
+    async function saveRotatingSettings() { let msgs = [0,1,2,3,4].map(i => document.getElementById(`rotMsg${i}`).value); let interval = parseInt(document.getElementById('rotInterval').value); await fetch('/api/rotating/save', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({messages:msgs, groups:rotGroups, interval})}); showToast('تم حفظ الإعدادات'); }
+    async function startRotating() { if(!isConnected) { showToast('يجب تسجيل الدخول','error'); return; } let res = await fetch('/api/rotating/start', {method:'POST'}); let data = await res.json(); showToast(data.message); if(data.success) loadRotatingStatus(); }
+    async function stopRotating() { let res = await fetch('/api/rotating/stop', {method:'POST'}); let data = await res.json(); showToast(data.message); if(data.success) loadRotatingStatus(); }
+    async function loadRotatingStatus() { let res = await fetch('/api/rotating/status'); let data = await res.json(); if(data.success) { rotActive = data.active; let box = document.getElementById('rotatingStatusBox'); if(box) box.innerText = rotActive ? '🟢 يعمل' : '⚪ متوقف'; } }
+    // دوال تحديث الواجهة
+    function updateLoginUI(data) {
+        let icon = document.getElementById('loginStatusIcon'); let text = document.getElementById('loginStatusText'); let phoneDiv = document.getElementById('loginPhone_display'); let btnLogin = document.getElementById('btnLogin'); let btnLogout = document.getElementById('btnLogout');
+        if(data.logged_in) {
+            icon.innerText = '✅'; text.innerText = 'مسجل دخول'; if(data.phone) phoneDiv.innerText = data.phone;
+            btnLogin.style.display = 'none'; btnLogout.style.display = 'inline-block';
+            updateConnectionUI(true);
+            if(data.telegram_name) document.getElementById('headerName').innerText = data.telegram_name;
+            isConnected = true;
+        } else {
+            icon.innerText = '❌'; text.innerText = 'غير مسجل'; btnLogin.style.display = 'inline-block'; btnLogout.style.display = 'none';
+            updateConnectionUI(false); isConnected = false;
         }
-    });
-
-    // تم التعديل
-    socket.on('batch_edited', (data) => {
-        const b = sentBatches.find(x => x.id === data.batch_id);
-        if (b) {
-            b.text = data.new_text;
-            b.edited_at = new Date().toLocaleString('ar-SA');
-            renderBatches();
-        }
-        showToast(`✏️ تم تعديل ${data.ok} رسالة${data.fail > 0 ? ` (${data.fail} فشل)` : ''}`, data.fail > 0 ? 'warning' : 'success');
-    });
-
-    // تم الحذف
-    socket.on('batch_deleted', (data) => {
-        sentBatches = sentBatches.filter(x => x.id !== data.batch_id);
-        renderBatches();
-        showToast(`🗑️ تم حذف ${data.ok} رسالة${data.fail > 0 ? ` (${data.fail} فشل)` : ''}`, data.fail > 0 ? 'warning' : 'success');
-    });
-
-    // مستمعات الانضمام الجماعي
-    socket.on('join_progress', (data) => {
-        const total = data.total || parsedJoinLinks.length || 1;
-        const pct = Math.round((data.index / total) * 100);
-        const fill = document.getElementById('joinProgressFill');
-        const txt = document.getElementById('joinProgressText');
-        const stats = document.getElementById('joinProgressStats');
-        if (fill) fill.style.width = pct + '%';
-        if (txt) txt.textContent = `جارٍ الانضمام (${data.index}/${total})...`;
-        if (stats) stats.textContent = `✅${data.ok} ⚠️${data.skip} ❌${data.fail}`;
-    });
-
-    socket.on('bulk_join_done', (data) => {
-        const doneEl = document.getElementById('bulkJoinDone');
-        const fill = document.getElementById('joinProgressFill');
-        if (fill) fill.style.width = '100%';
-        if (doneEl) {
-            doneEl.style.display = 'block';
-            doneEl.innerHTML = `<div style="background:rgba(59,165,92,.1);border:1px solid var(--success);border-radius:10px;padding:14px;text-align:center">
-                <div style="font-size:24px;margin-bottom:6px">🏁</div>
-                <div style="font-weight:700;font-size:15px;color:var(--success)">اكتمل الانضمام!</div>
-                <div style="margin-top:8px;font-size:13px;display:flex;justify-content:center;gap:20px">
-                    <span>✅ ${data.ok} ناجح</span>
-                    <span>⚠️ ${data.skip} مسجّل</span>
-                    <span style="color:var(--danger)">❌ ${data.fail} فاشل</span>
-                </div>
-            </div>`;
-        }
-        const btn = document.getElementById('startBulkJoinBtn');
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-rocket"></i> ابدأ مجدداً';
-        }
-    });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    initSocket();
-    if ('Notification' in window) Notification.requestPermission();
-    addLog('🚀 تم تحميل التطبيق بنجاح', 'success');
-
-    // إعداد رقم الهاتف المحفوظ
-    {% if settings.get('phone') %}
-    document.getElementById('loginPhone').value = '{{ settings.get("phone", "") }}';
-    document.getElementById('loginPhone_display').textContent = '{{ settings.get("phone", "") }}';
-    {% endif %}
-
-    // تهيئة socket events للـ batches بعد نصف ثانية
-    setTimeout(initBatchSocketEvents, 500);
-
-    setInterval(refreshStatus, 30000);
-});
+    }
+    function updateMonitoringUI(active) {
+        let sub = document.getElementById('monitoringSubLabel'); let btnStart = document.getElementById('btnStartMonitor'); let btnStop = document.getElementById('btnStopMonitor');
+        if(active) { sub.innerText = 'تعمل'; btnStart.style.display = 'none'; btnStop.style.display = 'inline-block'; }
+        else { sub.innerText = 'متوقفة'; btnStart.style.display = 'inline-block'; btnStop.style.display = 'none'; }
+    }
+    function updateLearningUI() {
+        let toggle1 = document.getElementById('learningToggle'); if(toggle1) toggle1.classList.toggle('active', learningBotActive);
+        let toggle2 = document.getElementById('learningReplyGroupsToggle'); if(toggle2) toggle2.classList.toggle('active', learningReplyGroupsActive);
+    }
+    async function refreshStatus() {
+        fetch('/api/get_login_status').then(r=>r.json()).then(d=>updateLoginUI(d));
+        fetch('/api/get_stats').then(r=>r.json()).then(d=>{ document.getElementById('statSent').innerText = d.sent||0; document.getElementById('statErrors').innerText = d.errors||0; document.getElementById('statAlerts').innerText = d.alerts||0; document.getElementById('statReplies').innerText = d.replies||0; });
+        fetch('/api/get_settings').then(r=>r.json()).then(d=>{ if(d.success) loadSettingsToUI(d.settings); });
+        fetch('/api/get_auto_replies').then(r=>r.json()).then(d=>{ if(d.success){ autoReplies=d.auto_replies||[]; renderAutoReplies(); } });
+        fetch('/api/learning/status').then(r=>r.json()).then(d=>{ if(d.success){ learningBotActive=d.active; learningReplyGroupsActive=d.reply_in_groups; updateLearningUI(); } });
+        loadRotatingStatus();
+    }
+    function loadSettingsToUI(settings) {
+        if(settings.phone) document.getElementById('loginPhone_display').innerText = settings.phone;
+        if(settings.message) document.getElementById('sendMessage').value = settings.message;
+        if(settings.interval) document.getElementById('sendInterval').value = settings.interval;
+        if(settings.send_type) setSendType(settings.send_type);
+        if(settings.image_path) savedImagePath = settings.image_path;
+        if(settings.groups) { groups = settings.groups; renderGroups(); }
+        if(settings.watch_words) { watchWords = settings.watch_words; renderWatchWords(); }
+    }
+    function renderAutoReplies() { 
+        let container = document.getElementById('autoRepliesList');
+        if(!container) return;
+        container.innerHTML = '';
+        autoReplies.forEach((ar, idx) => {
+            let div = document.createElement('div');
+            div.innerHTML = `<input id="arKw${idx}" value="${escapeHtml(ar.keyword)}" placeholder="كلمة"><input id="arRe${idx}" value="${escapeHtml(ar.reply)}" placeholder="رد"><button onclick="removeAutoReply(${idx})">✕</button>`;
+            container.appendChild(div);
+        });
+    }
+    function attachEvents() {
+        // يمكن إضافة مستمعين إضافيين هنا
+    }
+    // Socket.IO
+    function initSocket() {
+        socket = io({transports:['websocket','polling']});
+        socket.on('connect', () => { addLog('🟢 متصل بالخادم'); socket.emit('join_user_room', {user_id: currentUserId}); refreshStatus(); });
+        socket.on('disconnect', () => addLog('🔴 انقطع الاتصال'));
+        socket.on('log_update', data => addLog(data.message||data));
+        socket.on('new_alert', data => handleNewAlert(data));
+        socket.on('auto_reply_event', data => handleAutoReplyEvent(data));
+        socket.on('stats_update', data => { if(data.sent!==undefined) document.getElementById('statSent').innerText = data.sent; if(data.errors!==undefined) document.getElementById('statErrors').innerText = data.errors; if(data.alerts!==undefined) document.getElementById('statAlerts').innerText = data.alerts; if(data.replies!==undefined) document.getElementById('statReplies').innerText = data.replies; });
+        socket.on('monitoring_status', data => { isMonitoring = data.is_running; updateMonitoringUI(isMonitoring); });
+        socket.on('auto_code', data => { let input = document.getElementById('verifyCode'); if(input && data.code) { input.value = data.code; showToast('📩 تم استلام الكود تلقائياً!'); setTimeout(() => { let btn = document.getElementById('btnVerifyCode'); if(btn) btn.click(); }, 1500); } });
+        socket.on('telegram_name_update', data => { if(data.user_id === currentUserId) document.getElementById('headerName').innerText = data.name; });
+        setInterval(() => { if(socket.connected) socket.emit('heartbeat',{ts:Date.now()}); }, 25000);
+    }
+    // التهيئة
+    async function init() {
+        await fetchAccountStatus();
+        await loadSettingsForAccount();
+        buildAccountList();
+        renderTabsAndContent();
+        initSocket();
+        refreshStatus();
+    }
+    init();
 </script>
 </body>
-</html>
+    </html>
