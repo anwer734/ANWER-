@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>مركز سرعة إنجاز - تيليجرام</title>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/static/manifest.json">
     <meta name="theme-color" content="#1e3c78">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -36,389 +36,80 @@
             transition: all 0.3s ease;
             border: 1px solid rgba(255, 255, 255, 0.5);
         }
-        .status-bar {
-            background: #f8fafd;
-            padding: 12px 20px 6px 20px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            color: #2c3e50;
-            border-bottom: 1px solid #eef2f9;
-            font-weight: 500;
-        }
-        .app-header {
-            background: linear-gradient(135deg, #1a2a3a 0%, #0f1a24 100%);
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid #2c3e50;
-        }
-        .menu-btn {
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
-            font-size: 26px;
-            cursor: pointer;
-            color: #f9c74f;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 30px;
-            transition: 0.2s;
-        }
+        .status-bar { background: #f8fafd; padding: 12px 20px 6px 20px; display: flex; justify-content: space-between; font-size: 13px; color: #2c3e50; border-bottom: 1px solid #eef2f9; font-weight: 500; }
+        .app-header { background: linear-gradient(135deg, #1a2a3a 0%, #0f1a24 100%); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2c3e50; }
+        .menu-btn { background: rgba(255, 255, 255, 0.15); border: none; font-size: 26px; cursor: pointer; color: #f9c74f; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 30px; transition: 0.2s; }
         .menu-btn:hover { background: rgba(249, 199, 79, 0.3); transform: scale(1.02); }
-        .right-actions {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .pin-icon {
-            font-size: 22px;
-            color: #f9c74f;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        .right-actions { display: flex; align-items: center; gap: 14px; }
+        .pin-icon { font-size: 22px; color: #f9c74f; cursor: pointer; transition: 0.2s; }
         .pin-icon.pinned { color: #f9844a; text-shadow: 0 0 6px #f9844a; }
-        .connection-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #2c3e50;
-            padding: 6px 14px;
-            border-radius: 40px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            color: white;
-        }
-        .online-dot {
-            width: 10px;
-            height: 10px;
-            background-color: #2ecc71;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 0 2px #2ecc7140;
-        }
+        .connection-status { display: flex; align-items: center; gap: 8px; background: #2c3e50; padding: 6px 14px; border-radius: 40px; font-size: 12px; font-weight: 600; cursor: pointer; color: white; }
+        .online-dot { width: 10px; height: 10px; background-color: #2ecc71; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 2px #2ecc7140; }
         .offline-dot { background-color: #e74c3c; }
-        .welcome-area {
-            background: linear-gradient(120deg, #1f3b4c, #1a2f3f);
-            padding: 12px 20px;
-            text-align: center;
-            border-bottom: 1px solid #2c4b5e;
-        }
-        .welcome-text {
-            color: #f9d371;
-            font-size: 18px;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            background: rgba(0, 0, 0, 0.3);
-            display: inline-block;
-            padding: 6px 18px;
-            border-radius: 60px;
-            backdrop-filter: blur(4px);
-        }
+        .welcome-area { background: linear-gradient(120deg, #1f3b4c, #1a2f3f); padding: 12px 20px; text-align: center; border-bottom: 1px solid #2c4b5e; }
+        .welcome-text { color: #f9d371; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); background: rgba(0, 0, 0, 0.3); display: inline-block; padding: 6px 18px; border-radius: 60px; backdrop-filter: blur(4px); }
         .welcome-text i { margin-left: 8px; color: #f9c74f; }
-        .welcome-phone {
-            font-size: 14px;
-            color: #ffd966;
-            margin-top: 5px;
-            font-weight: 600;
-            direction: ltr;
-            display: inline-block;
-            background: #00000055;
-            padding: 3px 12px;
-            border-radius: 40px;
-        }
-        .action-buttons {
-            display: flex;
-            justify-content: space-around;
-            gap: 12px;
-            padding: 12px 20px;
-            background: #ffffffdd;
-            backdrop-filter: blur(4px);
-            border-bottom: 1px solid #eef2f9;
-        }
-        .action-btn {
-            flex: 1;
-            background: #2c7da0;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 40px;
-            color: white;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: 0.2s;
-        }
+        .welcome-phone { font-size: 14px; color: #ffd966; margin-top: 5px; font-weight: 600; direction: ltr; display: inline-block; background: #00000055; padding: 3px 12px; border-radius: 40px; }
+        .action-buttons { display: flex; justify-content: space-around; gap: 12px; padding: 12px 20px; background: #ffffffdd; backdrop-filter: blur(4px); border-bottom: 1px solid #eef2f9; }
+        .action-btn { flex: 1; background: #2c7da0; border: none; padding: 8px 12px; border-radius: 40px; color: white; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .action-btn.warning { background: #e67e22; }
         .action-btn.danger { background: #c0392b; }
         .action-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
-        .stats-bar {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin: 20px 20px 15px;
-        }
-        .stat-card {
-            background: #ffffffdd;
-            backdrop-filter: blur(4px);
-            border-radius: 28px;
-            padding: 12px 6px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(255, 215, 120, 0.4);
-        }
+        .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 20px 15px; }
+        .stat-card { background: #ffffffdd; backdrop-filter: blur(4px); border-radius: 28px; padding: 12px 6px; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.02); border: 1px solid rgba(255, 215, 120, 0.4); }
         .stat-card:hover { transform: translateY(-3px); background: #fff5e6; border-color: #f9c74f; }
         .stat-card i { font-size: 22px; color: #2c7da0; }
-        .tabs {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin: 0 20px 20px;
-            padding: 6px 0;
-        }
-        .tab-btn {
-            background: #eef2f9;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            color: #2c3e50;
-            transition: 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 20px 20px; padding: 6px 0; }
+        .tab-btn { background: #eef2f9; border: none; padding: 8px 16px; border-radius: 40px; font-size: 12px; font-weight: 700; cursor: pointer; color: #2c3e50; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
         .tab-btn.active { background: #2c7da0; color: white; box-shadow: 0 6px 12px rgba(44,125,160,0.3); }
         .tab-content { display: none; padding: 0 20px 30px; }
         .tab-content.active { display: block; }
-        .setting-section {
-            background: #ffffff;
-            border-radius: 32px;
-            margin-bottom: 24px;
-            border: 1px solid #e9ecef;
-            overflow: hidden;
-            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.03);
-        }
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 20px;
-            background: #fefcf7;
-            border-bottom: 1px solid #f0e6d2;
-            font-weight: 800;
-            font-size: 17px;
-            color: #1f4e6e;
-        }
+        .setting-section { background: #ffffff; border-radius: 32px; margin-bottom: 24px; border: 1px solid #e9ecef; overflow: hidden; box-shadow: 0 5px 12px rgba(0, 0, 0, 0.03); }
+        .section-header { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: #fefcf7; border-bottom: 1px solid #f0e6d2; font-weight: 800; font-size: 17px; color: #1f4e6e; }
         .section-header i { font-size: 22px; color: #f9c74f; width: 32px; }
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 20px;
-            border-bottom: 1px solid #f0f2f5;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #f0f2f5; flex-wrap: wrap; gap: 10px; }
         .setting-item:last-child { border-bottom: none; }
-        .btn, .btn-primary, .btn-secondary, .btn-danger, .btn-success {
-            background: #2c7da0;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 40px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 13px;
-            transition: 0.2s;
-        }
+        .btn, .btn-primary, .btn-secondary, .btn-danger, .btn-success { background: #2c7da0; border: none; padding: 8px 18px; border-radius: 40px; color: white; font-weight: 600; cursor: pointer; font-size: 13px; transition: 0.2s; }
         .btn-secondary { background: #a0b8c9; color: #1f2c33; }
         .btn-danger { background: #e67e22; }
         .btn-success { background: #27ae60; }
-        input, textarea, select {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #ddd;
-            border-radius: 28px;
-            font-family: inherit;
-            background: #fefefe;
-        }
-        .group-tag {
-            background: #eef2fa;
-            padding: 5px 12px;
-            border-radius: 30px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin: 4px;
-            font-size: 13px;
-        }
+        input, textarea, select { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 28px; font-family: inherit; background: #fefefe; }
+        .group-tag { background: #eef2fa; padding: 5px 12px; border-radius: 30px; display: inline-flex; align-items: center; gap: 8px; margin: 4px; font-size: 13px; }
         .group-tag .remove { cursor: pointer; color: #e67e22; }
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1f2c33;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-size: 14px;
-            z-index: 2000;
-            font-weight: 500;
-        }
-        .alert-item {
-            border-right: 4px solid #e67e22;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: #fff8f0;
-            border-radius: 20px;
-        }
-        .log-box {
-            background: #f8fafc;
-            border-radius: 24px;
-            padding: 12px;
-            height: 240px;
-            overflow-y: auto;
-            font-family: monospace;
-            font-size: 12px;
-        }
-        .drawer-overlay {
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            visibility: hidden;
-            opacity: 0;
-            transition: 0.2s;
-        }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1f2c33; color: white; padding: 8px 20px; border-radius: 50px; font-size: 14px; z-index: 2000; font-weight: 500; }
+        .alert-item { border-right: 4px solid #e67e22; margin-bottom: 10px; padding: 10px; background: #fff8f0; border-radius: 20px; }
+        .log-box { background: #f8fafc; border-radius: 24px; padding: 12px; height: 240px; overflow-y: auto; font-family: monospace; font-size: 12px; }
+        .drawer-overlay { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0, 0, 0, 0.5); z-index: 1000; visibility: hidden; opacity: 0; transition: 0.2s; }
         .drawer-overlay.open { visibility: visible; opacity: 1; }
-        .drawer-menu {
-            position: fixed;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            width: 280px;
-            background: #ffffff;
-            box-shadow: -4px 0 25px rgba(0, 0, 0, 0.1);
-            z-index: 1100;
-            transform: translateX(100%);
-            transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            display: flex;
-            flex-direction: column;
-            border-radius: 28px 0 0 28px;
-        }
+        .drawer-menu { position: fixed; right: 0; top: 0; bottom: 0; width: 280px; background: #ffffff; box-shadow: -4px 0 25px rgba(0, 0, 0, 0.1); z-index: 1100; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); display: flex; flex-direction: column; border-radius: 28px 0 0 28px; }
         .drawer-overlay.open .drawer-menu { transform: translateX(0); }
         .drawer-header { padding: 40px 24px 20px; background: #fafbfd; border-bottom: 1px solid #eceff5; }
         .account-list { flex: 1; padding: 20px 0; overflow-y: auto; }
-        .account-item {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 14px 24px;
-            cursor: pointer;
-            transition: 0.15s;
-        }
+        .account-item { display: flex; align-items: center; gap: 16px; padding: 14px 24px; cursor: pointer; transition: 0.15s; }
         .account-item:hover { background: #f5f9fe; }
         .account-item.active-account { background: #eef3fc; border-right: 4px solid #f9c74f; }
-        .account-avatar-small {
-            width: 48px;
-            height: 48px;
-            background: #cddfe7;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: bold;
-            color: #2c5a74;
-        }
-        .close-drawer {
-            margin: 20px;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #7f8c8d;
-            align-self: flex-start;
-        }
-        .add-account-btn {
-            margin: 16px 24px;
-            background: #eef3fa;
-            border-radius: 60px;
-            padding: 12px;
-            text-align: center;
-            color: #2c7da0;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-        }
+        .account-avatar-small { width: 48px; height: 48px; background: #cddfe7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: #2c5a74; }
+        .close-drawer { margin: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d; align-self: flex-start; }
+        .add-account-btn { margin: 16px 24px; background: #eef3fa; border-radius: 60px; padding: 12px; text-align: center; color: #2c7da0; font-weight: 600; cursor: pointer; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 10000; align-items: center; justify-content: center; }
         .modal-overlay.open { display: flex; }
-        .modal {
-            background: white;
-            border-radius: 40px;
-            padding: 24px;
-            max-width: 500px;
-            width: 90%;
-        }
-        .admin-modal-content {
-            max-width: 90%;
-            width: 600px;
-            background: white;
-            border-radius: 40px;
-            padding: 20px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
+        .modal { background: white; border-radius: 40px; padding: 24px; max-width: 500px; width: 90%; }
+        .admin-modal-content { max-width: 90%; width: 600px; background: white; border-radius: 40px; padding: 20px; max-height: 80vh; overflow-y: auto; }
         .error-item { background: #fff5f5; border: 1px solid #ffc9c9; border-radius: 20px; padding: 12px; margin-bottom: 12px; }
         .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-        .toggle-switch {
-            width: 50px;
-            height: 26px;
-            background: #ccc;
-            border-radius: 30px;
-            position: relative;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        .toggle-switch { width: 50px; height: 26px; background: #ccc; border-radius: 30px; position: relative; cursor: pointer; transition: 0.2s; }
         .toggle-switch.active { background: #27ae60; }
-        .toggle-switch::after {
-            content: '';
-            width: 22px;
-            height: 22px;
-            background: white;
-            border-radius: 50%;
-            position: absolute;
-            top: 2px;
-            right: 4px;
-            transition: 0.2s;
-        }
+        .toggle-switch::after { content: ''; width: 22px; height: 22px; background: white; border-radius: 50%; position: absolute; top: 2px; right: 4px; transition: 0.2s; }
         .toggle-switch.active::after { right: 24px; }
         .search-results, .result-item { margin-top: 10px; background: #f5f5f5; padding: 8px; border-radius: 16px; }
         .upload-preview { max-width: 100%; margin-top: 8px; border-radius: 20px; }
+        .status-icon { display: inline-flex; align-items: center; gap: 6px; margin-right: 10px; font-weight: bold; }
+        .status-icon.green { color: #2ecc71; }
+        .status-icon.red { color: #e74c3c; }
+        .status-icon.purple { color: #9b59b6; }
+        .status-icon.gray { color: #95a5a6; }
+        .status-icon.blue { color: #3498db; }
+        .status-icon.orange { color: #e67e22; }
     </style>
 </head>
 <body>
@@ -434,7 +125,7 @@
         </div>
     </div>
     <div class="welcome-area">
-        <div class="welcome-text"><i class="fas fa-star-of-life"></i> اهلا بكم الي تطبيق ابو ملاك للخدمات التقنية <i class="fas fa-star-of-life"></i></div>
+        <div class="welcome-text"><i class="fas fa-star-of-life"></i> اهلا بك <span id="telegramNameDisplay"></span> <i class="fas fa-star-of-life"></i></div>
         <div class="welcome-phone"><i class="fas fa-phone-alt"></i> +966510349663</div>
     </div>
 
@@ -463,17 +154,20 @@
     </div>
 </div>
 
-<!-- Modals -->
+<!-- Login Modal -->
 <div id="loginModal" class="modal-overlay"><div class="modal"><h3>🔐 تسجيل الدخول</h3><button class="modal-close" onclick="closeLoginModal()">✕</button>
     <div id="loginStep1"><input type="text" id="loginPhone" placeholder="+966XXXXXXXXX"><button class="btn-primary" onclick="startLogin()">إرسال الكود</button></div>
     <div id="loginStep2" style="display:none"><input type="text" id="verifyCode" placeholder="كود التحقق"><button class="btn-primary" id="btnVerifyCode" onclick="verifyCode()">تحقق</button><button onclick="backToPhone()">رجوع</button></div>
     <div id="loginStep3" style="display:none"><input type="password" id="twoFactorPass" placeholder="كلمة المرور"><button class="btn-primary" onclick="verifyPassword()">تأكيد</button></div>
 </div></div>
 
+<!-- Edit Batch Modal -->
 <div id="editBatchModal" class="modal-overlay"><div class="modal"><h3>تعديل الرسالة</h3><textarea id="editBatchText" rows="4"></textarea><input type="hidden" id="editBatchId"><button onclick="confirmEditBatch()">تعديل</button><button onclick="closeEditModal()">إلغاء</button></div></div>
 
+<!-- Error Explorer Modal -->
 <div id="errorExplorerModal" class="modal-overlay"><div class="modal" style="max-width:600px;"><h3>مستكشف الأخطاء</h3><button onclick="closeErrorExplorer()">✕</button><div id="errorsListContainer"></div><div class="btn-group"><button onclick="clearAllErrors()">مسح الكل</button><button onclick="diagnoseSystem()">تشخيص</button><button onclick="fixAllErrors()">إصلاح الكل</button></div></div></div>
 
+<!-- Admin Modal -->
 <div id="adminModal" class="modal-overlay"><div class="admin-modal-content"><h2>لوحة الإدارة</h2><button onclick="closeAdminModal()">✕</button>
     <div id="adminLoginForm"><input id="adminUsername" placeholder="admin"><input id="adminPassword" type="password" placeholder="كلمة المرور"><button onclick="adminLogin()">دخول</button></div>
     <div id="adminDashboard" style="display:none;">
@@ -495,7 +189,7 @@
 <script>
     // ========== المتغيرات العامة ==========
     let socket;
-    let currentUserId = '{{ current_user_id }}';
+    let currentUserId = 'user_1';
     let isConnected = false;
     let groups = [];
     let watchWords = [];
@@ -513,6 +207,7 @@
     let sentBatches = [];
     let isPinned = false;
     let isOnline = true;
+    let telegramRealName = '';
 
     const accountsMap = {
         user_1: { id: 'user_1', name: 'المستخدم الأول', color: '#5865f2', phone: '', logged_in: false, telegram_name: '' },
@@ -533,6 +228,7 @@
     const connectionDiv = document.getElementById('connectionStatus');
     const onlineDotSpan = document.getElementById('onlineDot');
     const statusTextSpan = document.getElementById('statusText');
+    const telegramNameSpan = document.getElementById('telegramNameDisplay');
 
     // ========== دوال مساعدة ==========
     function showToast(msg, type='info') { let t = document.createElement('div'); t.className = 'toast'; t.innerText = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2500); }
@@ -557,7 +253,8 @@
             accountsMap[currentAccountId].phone = data.phone || '';
             accountsMap[currentAccountId].telegram_name = data.telegram_name || accountsMap[currentAccountId].name;
             isConnected = data.logged_in;
-            document.getElementById('headerName').innerText = accountsMap[currentAccountId].telegram_name || accountsMap[currentAccountId].name;
+            telegramRealName = data.telegram_name || '';
+            if(telegramNameSpan) telegramNameSpan.innerText = telegramRealName ? ` (${telegramRealName})` : '';
         } catch(e) { console.error(e); }
     }
     async function loadSettingsForAccount() {
@@ -577,7 +274,7 @@
             }
             const rot = await fetch('/api/rotating/status');
             const rotData = await rot.json();
-            if (rotData.success) { rotGroups = rotData.groups || []; rotMessages = rotData.messages || ['','','','','']; rotActive = rotData.active; renderRotGroups(); document.querySelectorAll('#rotMsg0,#rotMsg1,#rotMsg2,#rotMsg3,#rotMsg4').forEach((el,i)=>{ if(el) el.value = rotMessages[i];}); if(document.getElementById('rotInterval')) document.getElementById('rotInterval').value = rotData.interval; }
+            if (rotData.success) { rotGroups = rotData.groups || []; rotMessages = rotData.messages || ['','','','','']; rotActive = rotData.active; renderRotGroups(); document.querySelectorAll('#rotMsg0,#rotMsg1,#rotMsg2,#rotMsg3,#rotMsg4').forEach((el,i)=>{ if(el) el.value = rotMessages[i];}); if(document.getElementById('rotInterval')) document.getElementById('rotInterval').value = rotData.interval; updateRotatingStatusUI(); }
             const learn = await fetch('/api/learning/status');
             const learnData = await learn.json();
             if (learnData.success) { learningBotActive = learnData.active; learningReplyGroupsActive = learnData.reply_in_groups; updateLearningUI(); }
@@ -587,6 +284,10 @@
             document.getElementById('statErrors').innerText = statsData.errors || 0;
             document.getElementById('statAlerts').innerText = statsData.alerts || 0;
             document.getElementById('statReplies').innerText = statsData.replies || 0;
+            // تحديث حالة المراقبة
+            const monStatus = await fetch('/api/get_monitoring_status');
+            const monData = await monStatus.json();
+            if(monData.success) updateMonitoringUI(monData.is_running);
         } catch(e) { console.error(e); }
     }
     async function switchUser(slot) {
@@ -661,12 +362,12 @@
 
     function renderLoginTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-user-lock"></i> حالة تسجيل الدخول</div><div class="setting-item"><span>الحالة</span><span id="loginStatusIcon">❌</span><span id="loginStatusText">غير مسجل</span></div><div class="setting-item"><span>رقم الهاتف</span><span id="loginPhone_display"></span></div><div class="setting-item"><button id="btnLogin" onclick="openLoginModal()">تسجيل الدخول</button><button id="btnLogout" onclick="doLogout()" style="display:none">تسجيل الخروج</button></div></div><div class="setting-section"><div class="section-header"><i class="fas fa-info-circle"></i> إعدادات API</div><div class="setting-item"><span>TELEGRAM_API_ID</span><span>✅ محددة</span></div><div class="setting-item"><span>TELEGRAM_API_HASH</span><span>✅ محددة</span></div></div>`; }
     function renderSendTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-paper-plane"></i> إرسال الرسائل</div><div class="setting-item"><span>نوع الإرسال</span><div><button class="btn-secondary" onclick="setSendType('manual')">فوري</button> <button class="btn-secondary" onclick="setSendType('scheduled')">مجدول</button></div></div><div class="setting-item" id="schedOpts" style="display:${sendType==='scheduled'?'flex':'none'}"><span>الفترة (دقائق)</span><input type="number" id="sendInterval" value="25"></div><div class="setting-item"><span>نص الرسالة</span><textarea id="sendMessage" rows="3"></textarea></div><div class="setting-item"><span>صورة</span><div><input type="file" id="imageInput" accept="image/*" onchange="uploadImage(this)"><img id="imagePreview" class="upload-preview" style="display:none; max-width:100%; margin-top:8px;"><button onclick="removeImage()">حذف</button></div></div><div class="setting-item"><span>روابط المجموعات</span><textarea id="rawGroupsInput" rows="2"></textarea><button class="btn-secondary" onclick="extractGroups()">استخراج</button><div id="groupsList" class="groups-container"></div></div><div class="setting-item"><button onclick="saveSendSettings()">💾 حفظ الإعدادات</button><button onclick="sendNow()">📤 إرسال الآن</button></div></div>`; }
-    function renderRotatingTab() { let msgs = ''; for(let i=0;i<5;i++) msgs += `<input type="text" id="rotMsg${i}" placeholder="رسالة ${i+1}" value="${rotMessages[i]}" style="margin-bottom:6px;"><br>`; return `<div class="setting-section"><div class="section-header"><i class="fas fa-sync-alt"></i> إرسال متسلسل</div>${msgs}<div class="setting-item"><span>المجموعات</span><textarea id="rotRawGroups" rows="2"></textarea><button onclick="extractRotGroups()">استخراج</button><div id="rotGroupsList"></div></div><div class="setting-item"><span>الفاصل (دقائق)</span><input type="number" id="rotInterval" value="${rotInterval}"></div><div class="setting-item"><button onclick="saveRotatingSettings()">💾 حفظ</button><button onclick="startRotating()">▶️ بدء</button><button onclick="stopRotating()">⏹️ إيقاف</button><span id="rotatingStatusBox"></span></div></div>`; }
-    function renderMonitorTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-eye"></i> مراقبة الكلمات</div><div class="setting-item"><span>الحالة</span><span id="monitoringSubLabel">متوقفة</span><button id="btnStartMonitor" onclick="startMonitoring()">تشغيل</button><button id="btnStopMonitor" onclick="stopMonitoring()" style="display:none">إيقاف</button></div><div class="setting-item"><span>كلمات المراقبة</span><textarea id="rawKeywordsInput" rows="2"></textarea><button onclick="extractKeywords()">استخراج</button><div id="watchWordsList"></div></div><div class="setting-item"><button onclick="saveSettings()">حفظ الكلمات</button></div><div class="section-header"><i class="fas fa-bell"></i> التنبيهات</div><div id="alertsList"></div></div>`; }
+    function renderRotatingTab() { let msgs = ''; for(let i=0;i<5;i++) msgs += `<input type="text" id="rotMsg${i}" placeholder="رسالة ${i+1}" value="${rotMessages[i]}" style="margin-bottom:6px;"><br>`; return `<div class="setting-section"><div class="section-header"><i class="fas fa-sync-alt"></i> إرسال متسلسل <span id="rotatingStatusIcon" class="status-icon ${rotActive ? 'purple' : 'gray'}"><i class="fas ${rotActive ? 'fa-play-circle' : 'fa-stop-circle'}"></i> ${rotActive ? 'يعمل' : 'متوقف'}</span></div>${msgs}<div class="setting-item"><span>المجموعات</span><textarea id="rotRawGroups" rows="2"></textarea><button onclick="extractRotGroups()">استخراج</button><div id="rotGroupsList"></div></div><div class="setting-item"><span>الفاصل (دقائق)</span><input type="number" id="rotInterval" value="${rotInterval}"></div><div class="setting-item"><button onclick="saveRotatingSettings()">💾 حفظ</button><button onclick="startRotating()">▶️ بدء</button><button onclick="stopRotating()">⏹️ إيقاف</button></div></div>`; }
+    function renderMonitorTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-eye"></i> مراقبة الكلمات <span id="monitoringStatusIcon" class="status-icon ${isMonitoring ? 'green' : 'red'}"><i class="fas ${isMonitoring ? 'fa-play' : 'fa-stop'}"></i> ${isMonitoring ? 'تعمل' : 'متوقفة'}</span></div><div class="setting-item"><button id="btnStartMonitor" onclick="startMonitoring()">تشغيل</button><button id="btnStopMonitor" onclick="stopMonitoring()" style="display:none">إيقاف</button></div><div class="setting-item"><span>كلمات المراقبة</span><textarea id="rawKeywordsInput" rows="2"></textarea><button onclick="extractKeywords()">استخراج</button><div id="watchWordsList"></div></div><div class="setting-item"><button onclick="saveSettings()">حفظ الكلمات</button></div><div class="section-header"><i class="fas fa-bell"></i> التنبيهات</div><div id="alertsList"></div></div>`; }
     function renderAutoReplyTab() { let arHtml = ''; autoReplies.forEach((ar,idx) => { arHtml += `<div><input id="arKw${idx}" value="${escapeHtml(ar.keyword)}" placeholder="كلمة"><input id="arRe${idx}" value="${escapeHtml(ar.reply)}" placeholder="رد"><button onclick="removeAutoReply(${idx})">✕</button></div>`; }); return `<div class="setting-section"><div class="section-header"><i class="fas fa-reply"></i> قواعد الرد التلقائي</div><div id="autoRepliesList">${arHtml}</div><button onclick="addAutoReplyRow()">➕ إضافة قاعدة</button><button onclick="saveAutoReplies()">💾 حفظ</button><div class="section-header"><i class="fas fa-list"></i> سجل الردود</div><div id="autoReplyLog"></div></div>`; }
     function renderGroupsTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-link"></i> الانضمام للمجموعات</div><div class="setting-item"><span>ألصق الروابط</span><textarea id="joinRawInput" rows="3"></textarea><button onclick="parseJoinLinks()">فرز الروابط</button><button onclick="clearJoinInput()">مسح</button></div><div id="joinParsedSection" style="display:none;"><div id="joinParsedList"></div><button onclick="startBulkJoin()">انضمام للجميع</button></div><div class="setting-item"><span>انضمام فردي</span><input id="joinGroupLink" placeholder="https://t.me/..."><button onclick="joinGroup()">انضم</button></div></div>`; }
     function renderSearchTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-search"></i> بحث متقدم</div><div class="setting-item"><span>نوع البحث</span><select id="searchType"><option value="text">نص</option><option value="telegram_links">روابط تيليجرام</option><option value="all_links">جميع الروابط</option></select></div><div class="setting-item"><span>النص/الكلمة</span><input type="text" id="searchQuery"></div><div class="setting-item"><span>استثناء محادثات</span><input id="excludeInput"><button onclick="addExcludeChat()">إضافة</button><div id="excludeTags"></div></div><div class="setting-item"><button onclick="performSearch()">🔍 بحث</button></div><div id="searchResults" class="search-results"></div></div>`; }
-    function renderLearningTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-robot"></i> البوت التعليمي</div><div class="setting-item"><span>حالة البوت</span><div class="toggle-switch ${learningBotActive ? 'active' : ''}" id="learningToggle" onclick="toggleLearningBot()"></div><span>الرد في المجموعات</span><div class="toggle-switch ${learningReplyGroupsActive ? 'active' : ''}" id="learningReplyGroupsToggle" onclick="toggleReplyInGroups()"></div></div><div class="setting-item"><button onclick="loadServices()">عرض الخدمات</button><div id="servicesList"></div></div><div class="setting-item"><button onclick="loadUnknownRequests()">الطلبات غير المعروفة</button><div id="unknownRequestsList"></div></div><div class="setting-item"><input id="newServiceName" placeholder="اسم الخدمة"><input id="newServiceDesc" placeholder="الوصف"><button onclick="addNewService()">تعليم خدمة</button></div></div>`; }
+    function renderLearningTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-robot"></i> البوت التعليمي <span id="learningStatusIcon" class="status-icon ${learningBotActive ? 'blue' : 'gray'}"><i class="fas ${learningBotActive ? 'fa-check-circle' : 'fa-ban'}"></i> ${learningBotActive ? 'نشط' : 'معطل'}</span> <span id="learningGroupsStatusIcon" class="status-icon ${learningReplyGroupsActive ? 'orange' : 'gray'}"><i class="fas ${learningReplyGroupsActive ? 'fa-users' : 'fa-user-slash'}"></i> ${learningReplyGroupsActive ? 'رد في المجموعات' : 'بدون مجموعات'}</span></div><div class="setting-item"><div class="toggle-switch ${learningBotActive ? 'active' : ''}" id="learningToggle" onclick="toggleLearningBot()"></div><span>تفعيل البوت</span></div><div class="setting-item"><div class="toggle-switch ${learningReplyGroupsActive ? 'active' : ''}" id="learningReplyGroupsToggle" onclick="toggleReplyInGroups()"></div><span>الرد في المجموعات</span></div><div class="setting-item"><button onclick="loadServices()">عرض الخدمات</button><div id="servicesList"></div></div><div class="setting-item"><button onclick="loadUnknownRequests()">الطلبات غير المعروفة</button><div id="unknownRequestsList"></div></div><div class="setting-item"><input id="newServiceName" placeholder="اسم الخدمة"><input id="newServiceDesc" placeholder="الوصف"><button onclick="addNewService()">تعليم خدمة</button></div></div>`; }
     function renderLogsTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-terminal"></i> سجل النشاط</div><div id="logBox" class="log-box"></div><button onclick="clearLog()">مسح</button></div>`; }
     function renderMsgsTab() { return `<div class="setting-section"><div class="section-header"><i class="fas fa-history"></i> رسائلي المُرسلة</div><div id="batchListContainer"></div><button onclick="loadSentBatches()">تحديث</button></div>`; }
 
@@ -681,8 +382,19 @@
     async function sendNow() { if(!isConnected) { showToast('يجب تسجيل الدخول أولاً','error'); return; } let msg = document.getElementById('sendMessage')?.value; if(!groups.length) await extractGroups(); if(!groups.length) { showToast('أضف مجموعات','error'); return; } await saveSendSettings(); let endpoint = sendType === 'scheduled' ? '/api/start_scheduled' : '/api/send_now'; let res = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ groups, message:msg, interval:parseInt(document.getElementById('sendInterval')?.value)||25, image_path:savedImagePath }) }); let data = await res.json(); showToast(data.message); }
     function setSendType(type) { sendType = type; let schedDiv = document.getElementById('schedOpts'); if(schedDiv) schedDiv.style.display = type==='scheduled'?'flex':'none'; }
     async function saveSettings() { let settings = { watch_words: watchWords }; await fetch('/api/save_settings', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(settings) }); showToast('تم حفظ الكلمات'); }
-    async function startMonitoring() { if(!isConnected) { showToast('يجب تسجيل الدخول','error'); return; } await saveSettings(); let res = await fetch('/api/start_monitoring', { method:'POST' }); let data = await res.json(); if(data.success) { isMonitoring = true; document.getElementById('monitoringSubLabel').innerText = 'تعمل'; document.getElementById('btnStartMonitor').style.display = 'none'; document.getElementById('btnStopMonitor').style.display = 'inline-block'; showToast('تم تشغيل المراقبة'); } }
-    async function stopMonitoring() { let res = await fetch('/api/stop_monitoring', { method:'POST' }); let data = await res.json(); if(data.success) { isMonitoring = false; document.getElementById('monitoringSubLabel').innerText = 'متوقفة'; document.getElementById('btnStartMonitor').style.display = 'inline-block'; document.getElementById('btnStopMonitor').style.display = 'none'; showToast('تم إيقاف المراقبة'); } }
+    async function startMonitoring() { if(!isConnected) { showToast('يجب تسجيل الدخول','error'); return; } await saveSettings(); let res = await fetch('/api/start_monitoring', { method:'POST' }); let data = await res.json(); if(data.success) { isMonitoring = true; updateMonitoringUI(true); showToast('تم تشغيل المراقبة'); } }
+    async function stopMonitoring() { let res = await fetch('/api/stop_monitoring', { method:'POST' }); let data = await res.json(); if(data.success) { isMonitoring = false; updateMonitoringUI(false); showToast('تم إيقاف المراقبة'); } }
+    function updateMonitoringUI(active) {
+        isMonitoring = active;
+        let iconSpan = document.getElementById('monitoringStatusIcon');
+        if(iconSpan) { iconSpan.className = `status-icon ${active ? 'green' : 'red'}`; iconSpan.innerHTML = `<i class="fas ${active ? 'fa-play' : 'fa-stop'}"></i> ${active ? 'تعمل' : 'متوقفة'}`; }
+        let btnStart = document.getElementById('btnStartMonitor'); let btnStop = document.getElementById('btnStopMonitor');
+        if(btnStart && btnStop) { btnStart.style.display = active ? 'none' : 'inline-block'; btnStop.style.display = active ? 'inline-block' : 'none'; }
+    }
+    function updateRotatingStatusUI() {
+        let iconSpan = document.getElementById('rotatingStatusIcon');
+        if(iconSpan) { iconSpan.className = `status-icon ${rotActive ? 'purple' : 'gray'}`; iconSpan.innerHTML = `<i class="fas ${rotActive ? 'fa-play-circle' : 'fa-stop-circle'}"></i> ${rotActive ? 'يعمل' : 'متوقف'}`; }
+    }
     function handleNewAlert(alert) { let container = document.getElementById('alertsList'); if(container) { let item = document.createElement('div'); item.className = 'alert-item'; item.innerHTML = `<strong>🔍 ${alert.keyword}</strong> في ${alert.group} من ${alert.sender}<br>${alert.message.substring(0,100)}`; container.prepend(item); } }
     function handleAutoReplyEvent(data) { let container = document.getElementById('autoReplyLog'); if(container) { let item = document.createElement('div'); item.innerHTML = `🤖 رد على "${data.keyword}" في ${data.chat}: ${data.reply_msg.substring(0,80)}`; container.prepend(item); } }
     async function resetStats() { await fetch('/api/reset_stats', { method:'POST' }); showToast('تم إعادة تعيين الإحصائيات'); refreshStatus(); }
@@ -725,8 +437,6 @@
     function exportAllData() { window.location.href = '/admin/api/export'; }
     async function restartServer() { if(confirm('إعادة التشغيل ستقطع الاتصال. متابعة؟')) { let res = await fetch('/admin/api/restart', {method:'POST'}); let data = await res.json(); alert(data.message); if(data.success) setTimeout(()=>location.reload(),2000); } }
     function setDefaultFile(fname) { document.getElementById('editFileName').value = fname; }
-    async function adminToggleBlock(userId) { let res = await fetch(`/admin/api/user/${userId}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'block', blocked:true}) }); let data = await res.json(); showToast(data.message); loadAdminUsers(); }
-    async function adminFetchChats(userId) { let res = await fetch(`/admin/api/fetch_chats/${userId}`); let data = await res.json(); if(data.success) { let chats = data.chats.map(c => c.title).join('\n'); alert(`مجموعات المستخدم:\n${chats}`); } else showToast(data.message); }
     // دوال تسجيل الدخول
     function openLoginModal(step=1) { document.getElementById('loginModal').classList.add('open'); document.getElementById('loginStep1').style.display = step===1?'block':'none'; document.getElementById('loginStep2').style.display = step===2?'block':'none'; document.getElementById('loginStep3').style.display = step===3?'block':'none'; }
     function closeLoginModal() { document.getElementById('loginModal').classList.remove('open'); }
@@ -742,8 +452,15 @@
     async function saveAutoReplies() { let newAR = []; let i=0; while(document.getElementById(`arKw${i}`)) { let kw = document.getElementById(`arKw${i}`).value; let rep = document.getElementById(`arRe${i}`).value; if(kw && rep) newAR.push({keyword:kw, reply:rep}); i++; } let res = await fetch('/api/save_auto_replies', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({auto_replies:newAR})}); let data = await res.json(); if(data.success) { autoReplies = newAR; showToast('تم حفظ الردود'); } }
     function removeAutoReply(idx) { let el = document.getElementById(`arKw${idx}`)?.parentElement; if(el) el.remove(); }
     // دوال البوت التعليمي
-    async function toggleLearningBot() { let toggle = document.getElementById('learningToggle'); toggle.classList.toggle('active'); let res = await fetch('/api/learning/toggle', {method:'POST'}); let data = await res.json(); if(data.success) learningBotActive = data.active; else toggle.classList.toggle('active'); showToast(data.message); }
-    async function toggleReplyInGroups() { let toggle = document.getElementById('learningReplyGroupsToggle'); toggle.classList.toggle('active'); let res = await fetch('/api/learning/toggle_public', {method:'POST'}); let data = await res.json(); if(data.success) learningReplyGroupsActive = data.reply_in_groups; else toggle.classList.toggle('active'); showToast(data.message); }
+    async function toggleLearningBot() { let toggle = document.getElementById('learningToggle'); toggle.classList.toggle('active'); let res = await fetch('/api/learning/toggle', {method:'POST'}); let data = await res.json(); if(data.success) learningBotActive = data.active; else toggle.classList.toggle('active'); updateLearningUI(); showToast(data.message); }
+    async function toggleReplyInGroups() { let toggle = document.getElementById('learningReplyGroupsToggle'); toggle.classList.toggle('active'); let res = await fetch('/api/learning/toggle_public', {method:'POST'}); let data = await res.json(); if(data.success) learningReplyGroupsActive = data.reply_in_groups; else toggle.classList.toggle('active'); updateLearningUI(); showToast(data.message); }
+    function updateLearningUI() {
+        let iconSpan = document.getElementById('learningStatusIcon'); let groupsIconSpan = document.getElementById('learningGroupsStatusIcon');
+        if(iconSpan) { iconSpan.className = `status-icon ${learningBotActive ? 'blue' : 'gray'}`; iconSpan.innerHTML = `<i class="fas ${learningBotActive ? 'fa-check-circle' : 'fa-ban'}"></i> ${learningBotActive ? 'نشط' : 'معطل'}`; }
+        if(groupsIconSpan) { groupsIconSpan.className = `status-icon ${learningReplyGroupsActive ? 'orange' : 'gray'}`; groupsIconSpan.innerHTML = `<i class="fas ${learningReplyGroupsActive ? 'fa-users' : 'fa-user-slash'}"></i> ${learningReplyGroupsActive ? 'رد في المجموعات' : 'بدون مجموعات'}`; }
+        let toggle1 = document.getElementById('learningToggle'); if(toggle1) toggle1.classList.toggle('active', learningBotActive);
+        let toggle2 = document.getElementById('learningReplyGroupsToggle'); if(toggle2) toggle2.classList.toggle('active', learningReplyGroupsActive);
+    }
     async function loadServices() { let res = await fetch('/api/learning/services'); let data = await res.json(); let container = document.getElementById('servicesList'); if(data.success) container.innerHTML = Object.entries(data.services).map(([k,v])=>`<div>${k}: ${v.description}</div>`).join(''); }
     async function loadUnknownRequests() { let res = await fetch('/api/learning/unknown'); let data = await res.json(); let container = document.getElementById('unknownRequestsList'); if(data.success && data.requests.length) container.innerHTML = data.requests.map((r,i)=>`<div>${r.raw_text} <button onclick="openTeachModal(${i},'${escapeHtml(r.suggested_name)}')">تعلم</button></div>`).join(''); else container.innerHTML = 'لا توجد طلبات'; }
     function openTeachModal(idx, name) { document.getElementById('teachUnknownIndex').value = idx; document.getElementById('teachServiceName').value = name; document.getElementById('teachServiceDesc').value = ''; document.getElementById('teachFromUnknownModal').classList.add('open'); }
@@ -754,9 +471,9 @@
     async function extractRotGroups() { let raw = document.getElementById('rotRawGroups')?.value; if(!raw) return; let res = await fetch('/api/parse_input', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text:raw, mode:'groups'})}); let data = await res.json(); if(data.success) { data.items.forEach(item => { if(!rotGroups.includes(item)) rotGroups.push(item); }); renderRotGroups(); } }
     function renderRotGroups() { let div = document.getElementById('rotGroupsList'); if(div) div.innerHTML = rotGroups.map(g => `<span class="group-tag">${g} <span class="remove" onclick="rotGroups=rotGroups.filter(x=>x!=='${g}'); renderRotGroups();">✕</span></span>`).join(''); }
     async function saveRotatingSettings() { let msgs = [0,1,2,3,4].map(i => document.getElementById(`rotMsg${i}`).value); let interval = parseInt(document.getElementById('rotInterval').value); await fetch('/api/rotating/save', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({messages:msgs, groups:rotGroups, interval})}); showToast('تم حفظ الإعدادات'); }
-    async function startRotating() { if(!isConnected) { showToast('يجب تسجيل الدخول','error'); return; } let res = await fetch('/api/rotating/start', {method:'POST'}); let data = await res.json(); showToast(data.message); if(data.success) loadRotatingStatus(); }
-    async function stopRotating() { let res = await fetch('/api/rotating/stop', {method:'POST'}); let data = await res.json(); showToast(data.message); if(data.success) loadRotatingStatus(); }
-    async function loadRotatingStatus() { let res = await fetch('/api/rotating/status'); let data = await res.json(); if(data.success) { rotActive = data.active; let box = document.getElementById('rotatingStatusBox'); if(box) box.innerText = rotActive ? '🟢 يعمل' : '⚪ متوقف'; } }
+    async function startRotating() { if(!isConnected) { showToast('يجب تسجيل الدخول','error'); return; } let res = await fetch('/api/rotating/start', {method:'POST'}); let data = await res.json(); showToast(data.message); if(data.success) { rotActive = true; updateRotatingStatusUI(); } }
+    async function stopRotating() { let res = await fetch('/api/rotating/stop', {method:'POST'}); let data = await res.json(); showToast(data.message); if(data.success) { rotActive = false; updateRotatingStatusUI(); } }
+    async function loadRotatingStatus() { let res = await fetch('/api/rotating/status'); let data = await res.json(); if(data.success) { rotActive = data.active; updateRotatingStatusUI(); } }
     // دوال تحديث الواجهة
     function updateLoginUI(data) {
         let icon = document.getElementById('loginStatusIcon'); let text = document.getElementById('loginStatusText'); let phoneDiv = document.getElementById('loginPhone_display'); let btnLogin = document.getElementById('btnLogin'); let btnLogout = document.getElementById('btnLogout');
@@ -764,21 +481,13 @@
             icon.innerText = '✅'; text.innerText = 'مسجل دخول'; if(data.phone) phoneDiv.innerText = data.phone;
             btnLogin.style.display = 'none'; btnLogout.style.display = 'inline-block';
             updateConnectionUI(true);
-            if(data.telegram_name) document.getElementById('headerName').innerText = data.telegram_name;
+            if(data.telegram_name) { telegramRealName = data.telegram_name; if(telegramNameSpan) telegramNameSpan.innerText = ` (${telegramRealName})`; }
             isConnected = true;
         } else {
             icon.innerText = '❌'; text.innerText = 'غير مسجل'; btnLogin.style.display = 'inline-block'; btnLogout.style.display = 'none';
             updateConnectionUI(false); isConnected = false;
+            if(telegramNameSpan) telegramNameSpan.innerText = '';
         }
-    }
-    function updateMonitoringUI(active) {
-        let sub = document.getElementById('monitoringSubLabel'); let btnStart = document.getElementById('btnStartMonitor'); let btnStop = document.getElementById('btnStopMonitor');
-        if(active) { sub.innerText = 'تعمل'; btnStart.style.display = 'none'; btnStop.style.display = 'inline-block'; }
-        else { sub.innerText = 'متوقفة'; btnStart.style.display = 'inline-block'; btnStop.style.display = 'none'; }
-    }
-    function updateLearningUI() {
-        let toggle1 = document.getElementById('learningToggle'); if(toggle1) toggle1.classList.toggle('active', learningBotActive);
-        let toggle2 = document.getElementById('learningReplyGroupsToggle'); if(toggle2) toggle2.classList.toggle('active', learningReplyGroupsActive);
     }
     async function refreshStatus() {
         fetch('/api/get_login_status').then(r=>r.json()).then(d=>updateLoginUI(d));
@@ -787,6 +496,10 @@
         fetch('/api/get_auto_replies').then(r=>r.json()).then(d=>{ if(d.success){ autoReplies=d.auto_replies||[]; renderAutoReplies(); } });
         fetch('/api/learning/status').then(r=>r.json()).then(d=>{ if(d.success){ learningBotActive=d.active; learningReplyGroupsActive=d.reply_in_groups; updateLearningUI(); } });
         loadRotatingStatus();
+        // جلب حالة المراقبة
+        let monRes = await fetch('/api/get_monitoring_status');
+        let monData = await monRes.json();
+        if(monData.success) updateMonitoringUI(monData.is_running);
     }
     function loadSettingsToUI(settings) {
         if(settings.phone) document.getElementById('loginPhone_display').innerText = settings.phone;
@@ -797,18 +510,9 @@
         if(settings.groups) { groups = settings.groups; renderGroups(); }
         if(settings.watch_words) { watchWords = settings.watch_words; renderWatchWords(); }
     }
-    function renderAutoReplies() { 
-        let container = document.getElementById('autoRepliesList');
-        if(!container) return;
-        container.innerHTML = '';
-        autoReplies.forEach((ar, idx) => {
-            let div = document.createElement('div');
-            div.innerHTML = `<input id="arKw${idx}" value="${escapeHtml(ar.keyword)}" placeholder="كلمة"><input id="arRe${idx}" value="${escapeHtml(ar.reply)}" placeholder="رد"><button onclick="removeAutoReply(${idx})">✕</button>`;
-            container.appendChild(div);
-        });
-    }
+    function renderAutoReplies() { /* سيتم إعادة بناء التبويب عند الحاجة */ }
     function attachEvents() {
-        // يمكن إضافة مستمعين إضافيين هنا
+        // إضافة مستمعين لأحداث socket
     }
     // Socket.IO
     function initSocket() {
@@ -821,9 +525,15 @@
         socket.on('stats_update', data => { if(data.sent!==undefined) document.getElementById('statSent').innerText = data.sent; if(data.errors!==undefined) document.getElementById('statErrors').innerText = data.errors; if(data.alerts!==undefined) document.getElementById('statAlerts').innerText = data.alerts; if(data.replies!==undefined) document.getElementById('statReplies').innerText = data.replies; });
         socket.on('monitoring_status', data => { isMonitoring = data.is_running; updateMonitoringUI(isMonitoring); });
         socket.on('auto_code', data => { let input = document.getElementById('verifyCode'); if(input && data.code) { input.value = data.code; showToast('📩 تم استلام الكود تلقائياً!'); setTimeout(() => { let btn = document.getElementById('btnVerifyCode'); if(btn) btn.click(); }, 1500); } });
-        socket.on('telegram_name_update', data => { if(data.user_id === currentUserId) document.getElementById('headerName').innerText = data.name; });
+        socket.on('telegram_name_update', data => { if(data.user_id === currentUserId) { telegramRealName = data.name; if(telegramNameSpan) telegramNameSpan.innerText = ` (${telegramRealName})`; } });
         setInterval(() => { if(socket.connected) socket.emit('heartbeat',{ts:Date.now()}); }, 25000);
     }
+    // PWA
+    let deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstallPrompt = e; if(!sessionStorage.getItem('pwaBannerDismissed')) setTimeout(() => { document.getElementById('pwaInstallBanner').style.display = 'flex'; }, 3000); });
+    window.addEventListener('appinstalled', () => { document.getElementById('pwaInstallBanner').style.display = 'none'; deferredInstallPrompt = null; });
+    async function doInstallPWA() { if(deferredInstallPrompt) { deferredInstallPrompt.prompt(); const { outcome } = await deferredInstallPrompt.userChoice; deferredInstallPrompt = null; } }
+    function dismissPWABanner() { document.getElementById('pwaInstallBanner').style.display = 'none'; sessionStorage.setItem('pwaBannerDismissed', '1'); }
     // التهيئة
     async function init() {
         await fetchAccountStatus();
@@ -836,4 +546,4 @@
     init();
 </script>
 </body>
-    </html>
+</html>
